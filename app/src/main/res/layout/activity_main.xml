@@ -11,7 +11,7 @@
         android:orientation="vertical"
         android:padding="16dp">
 
-        <!-- Header + status -->
+        <!-- Header + status. Tap badge READ_LOGS = grant (root). -->
         <LinearLayout
             style="@style/HiCard"
             android:layout_width="match_parent"
@@ -76,6 +76,9 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginEnd="8dp"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:foreground="?attr/selectableItemBackground"
                         android:text="READ_LOGS: ..."
                         android:textColor="#FFFFFF" />
 
@@ -87,6 +90,13 @@
                         android:text="MODUL: ..."
                         android:textColor="#FFFFFF" />
                 </LinearLayout>
+
+                <TextView
+                    style="@style/HiSectionDesc"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:text="Tap badge READ_LOGS untuk grant via root." />
             </LinearLayout>
         </LinearLayout>
 
@@ -135,7 +145,7 @@
             </LinearLayout>
         </LinearLayout>
 
-        <!-- Pengaturan tracer: SATU kartu expandable -->
+        <!-- Pengaturan Tracer: SATU kartu expandable berisi SEMUA config tracer -->
         <LinearLayout
             android:id="@+id/cardTracer"
             style="@style/HiCard"
@@ -171,7 +181,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="2dp"
-                        android:text="7 opsi tracer — tap untuk buka/tutup" />
+                        android:text="Toggle tracer, filter prefix, hook class — tap untuk buka/tutup" />
                 </LinearLayout>
 
                 <ImageView
@@ -189,6 +199,14 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:visibility="gone">
+
+                <!-- (1) 7 toggle tracer -->
+                <TextView
+                    style="@style/HiSectionTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="Fitur tracer" />
 
                 <com.google.android.material.switchmaterial.SwitchMaterial
                     android:id="@+id/cbMethod"
@@ -251,23 +269,16 @@
                     style="@style/HiSectionDesc"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="4dp"
                     android:text="Argumen/return bikin log lebih ramai — matikan bila lag." />
-            </LinearLayout>
-        </LinearLayout>
 
-        <!-- Filter prefix -->
-        <LinearLayout
-            style="@style/HiCard"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp">
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginTop="12dp"
+                    android:layout_marginBottom="12dp"
+                    android:background="#1FFFFFFF" />
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
-
+                <!-- (2) Filter class prefix -->
                 <TextView
                     style="@style/HiSectionTitle"
                     android:layout_width="wrap_content"
@@ -340,21 +351,15 @@
                         android:layout_weight="1"
                         android:text="Hapus semua" />
                 </LinearLayout>
-            </LinearLayout>
-        </LinearLayout>
 
-        <!-- Hook class exact -->
-        <LinearLayout
-            style="@style/HiCard"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp">
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginTop="12dp"
+                    android:layout_marginBottom="12dp"
+                    android:background="#1FFFFFFF" />
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
-
+                <!-- (3) Hook class exact -->
                 <TextView
                     style="@style/HiSectionTitle"
                     android:layout_width="wrap_content"
@@ -403,6 +408,16 @@
                     android:layout_marginTop="4dp"
                     android:fontFamily="monospace"
                     android:text="" />
+
+                <!-- (4) Simpan config (di dalam kartu) -->
+                <Button
+                    android:id="@+id/btnSaveInner"
+                    style="@style/HiButtonGlass"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:layout_marginBottom="4dp"
+                    android:text="SIMPAN CONFIG" />
             </LinearLayout>
         </LinearLayout>
 
@@ -425,14 +440,6 @@
                 android:layout_height="wrap_content"
                 android:text="MULAI TRACING" />
         </FrameLayout>
-
-        <Button
-            android:id="@+id/btnGrant"
-            style="@style/HiButtonGlass"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:text="GRANT READ_LOGS (root)" />
 
         <!-- Tools: grid kartu aksi kaca 2 kolom -->
         <TextView

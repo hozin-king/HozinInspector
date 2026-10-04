@@ -49,7 +49,7 @@ public class MainActivity extends BaseActivity {
             tvGrantStatus, tvModuleStatus, tvClassSummary;
     private EditText etPrefix;
     private SwitchMaterial cbMethod, cbUrl, cbUi, cbPref, cbDump, cbRate, cbLogArgs;
-    private Button btnSave;
+    private Button btnSave, btnSaveInner;
     private String targetPackage = "";
     private final List<String> prefixes = new ArrayList<>();
     private final List<String> hookClasses = new ArrayList<>();
@@ -77,6 +77,7 @@ public class MainActivity extends BaseActivity {
         cbRate = findViewById(R.id.cbRate);
         cbLogArgs = findViewById(R.id.cbLogArgs);
         btnSave = findViewById(R.id.btnSave);
+        btnSaveInner = findViewById(R.id.btnSaveInner);
 
         restoreUiState();
         renderPrefixes();
@@ -106,7 +107,9 @@ public class MainActivity extends BaseActivity {
         });
         findViewById(R.id.btnPickClass).setOnClickListener(v -> pickClass());
         btnSave.setOnClickListener(v -> saveConfig());
-        findViewById(R.id.btnGrant).setOnClickListener(v -> grantLogs());
+        btnSaveInner.setOnClickListener(v -> saveConfig());
+        // Tap badge READ_LOGS di kartu status = grant via root
+        tvGrantStatus.setOnClickListener(v -> grantLogs());
         findViewById(R.id.btnSettings).setOnClickListener(v ->
                 startActivity(new Intent(this, SettingsActivity.class)));
         findViewById(R.id.cardSettings).setOnClickListener(v ->
@@ -369,6 +372,7 @@ public class MainActivity extends BaseActivity {
         }
         persistUiState();
         btnSave.setEnabled(false);
+        btnSaveInner.setEnabled(false);
         tvStatus.setText("Menyimpan config...");
         final boolean method = cbMethod.isChecked();
         final boolean url = cbUrl.isChecked();
@@ -424,6 +428,7 @@ public class MainActivity extends BaseActivity {
             final String msg = status;
             handler.post(() -> {
                 btnSave.setEnabled(true);
+                btnSaveInner.setEnabled(true);
                 tvStatus.setText(msg);
             });
         }).start();
