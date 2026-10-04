@@ -33,14 +33,25 @@
             android:textStyle="bold" />
 
         <TextView
+            android:id="@+id/tvArtHost"
+            style="@style/HiStatusPill"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:textSize="10sp"
+            android:visibility="gone" />
+
+        <TextView
             android:id="@+id/tvArtUrl"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="2dp"
+            android:clickable="true"
             android:ellipsize="middle"
+            android:focusable="true"
             android:fontFamily="monospace"
             android:maxLines="1"
-            android:textColor="#80FFFFFF"
+            android:textColor="#7FD4FF"
             android:textSize="11sp" />
     </LinearLayout>
 </LinearLayout>

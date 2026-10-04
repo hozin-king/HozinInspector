@@ -23,6 +23,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.hozinking.appinspector.R;
 
+import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -110,6 +111,20 @@ public class SavedActivity extends AppCompatActivity {
     private void openReader(long id) {
         Intent i = new Intent(this, ReaderActivity.class);
         i.putExtra(ReaderActivity.EXTRA_SAVED_ID, id);
+        // artikel tersimpan lain sebagai "Artikel terkait" di reader
+        List<ReaderActivity.Related> rel = new ArrayList<>();
+        for (SavedArticleDb.SavedItem it : adapter.getData()) {
+            if (it.id == id) continue;
+            ReaderActivity.Related r = new ReaderActivity.Related();
+            r.title = it.title;
+            r.url = it.url;
+            r.thumb = it.thumbPath;
+            r.savedId = it.id;
+            rel.add(r);
+            if (rel.size() >= 40) break;
+        }
+        i.putExtra(ReaderActivity.EXTRA_RELATED_JSON,
+                ReaderActivity.buildRelatedJson(rel));
         startActivity(i);
     }
 
@@ -155,6 +170,10 @@ public class SavedActivity extends AppCompatActivity {
             notifyDataSetChanged();
         }
 
+        List<SavedArticleDb.SavedItem> getData() {
+            return data;
+        }
+
         @NonNull
         @Override
         public VH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -174,6 +193,25 @@ public class SavedActivity extends AppCompatActivity {
                 h.tvExcerpt.setVisibility(View.GONE);
             }
             h.tvDate.setText(df.format(new Date(it.savedAt)));
+
+            // badge host/subdomain
+            String host = hostOf(it.url);
+            if (!host.isEmpty()) {
+                h.tvHost.setText(host);
+                h.tvHost.setVisibility(View.VISIBLE);
+            } else {
+                h.tvHost.setVisibility(View.GONE);
+            }
+            // URL bisa di-tap → buka di browser
+            if (it.url != null && !it.url.isEmpty()) {
+                h.tvUrl.setText(it.url);
+                h.tvUrl.setPaintFlags(h.tvUrl.getPaintFlags()
+                        | android.graphics.Paint.UNDERLINE_TEXT_FLAG);
+                h.tvUrl.setVisibility(View.VISIBLE);
+                h.tvUrl.setOnClickListener(v -> openBrowser(it.url));
+            } else {
+                h.tvUrl.setVisibility(View.GONE);
+            }
 
             h.ivThumb.setImageBitmap(null);
             h.ivThumb.setTag(it.thumbPath);
@@ -203,7 +241,7 @@ public class SavedActivity extends AppCompatActivity {
 
         class VH extends RecyclerView.ViewHolder {
             final ImageView ivThumb;
-            final TextView tvTitle, tvExcerpt, tvDate;
+            final TextView tvTitle, tvExcerpt, tvDate, tvHost, tvUrl;
 
             VH(@NonNull View v) {
                 super(v);
@@ -211,7 +249,28 @@ public class SavedActivity extends AppCompatActivity {
                 tvTitle = v.findViewById(R.id.tvSavedTitle);
                 tvExcerpt = v.findViewById(R.id.tvSavedExcerpt);
                 tvDate = v.findViewById(R.id.tvSavedDate);
+                tvHost = v.findViewById(R.id.tvSavedHost);
+                tvUrl = v.findViewById(R.id.tvSavedUrl);
             }
+        }
+    }
+
+    private static String hostOf(String url) {
+        if (url == null) return "";
+        try {
+            String h = new URL(url).getHost();
+            return h.startsWith("www.") ? h.substring(4) : h;
+        } catch (Exception e) {
+            return "";
+        }
+    }
+
+    private void openBrowser(String url) {
+        try {
+            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
+        } catch (Exception e) {
+            Toast.makeText(this, "Tidak bisa membuka browser",
+                    Toast.LENGTH_SHORT).show();
         }
     }
 }

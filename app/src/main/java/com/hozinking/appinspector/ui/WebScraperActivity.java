@@ -75,8 +75,8 @@ public class WebScraperActivity extends AppCompatActivity {
 
     private EditText etUrl, etSearch;
     private Button btnScrape, btnCopyAll, btnExport;
-    private TextView tvStatus, tvPageTitle, tvPageDesc, tvPageUrl, tvArticleCount,
-            tvSavedCountWs;
+    private TextView tvStatus, tvPageTitle, tvPageDesc, tvPageUrl, tvPageHost,
+            tvArticleCount, tvSavedCountWs;
     private ImageView ivPageThumb;
     private RecyclerView rv;
     private View cardPageInfo, cardArticles;
@@ -144,6 +144,7 @@ public class WebScraperActivity extends AppCompatActivity {
         tvPageTitle = findViewById(R.id.tvPageTitle);
         tvPageDesc = findViewById(R.id.tvPageDesc);
         tvPageUrl = findViewById(R.id.tvPageUrl);
+        tvPageHost = findViewById(R.id.tvPageHost);
         tvArticleCount = findViewById(R.id.tvArticleCount);
         ivPageThumb = findViewById(R.id.ivPageThumb);
         rv = findViewById(R.id.rvArticles);
@@ -414,7 +415,43 @@ public class WebScraperActivity extends AppCompatActivity {
         tvPageTitle.setText(p.title);
         tvPageDesc.setText(p.desc.isEmpty() ? "(tidak ada deskripsi)" : p.desc);
         tvPageUrl.setText(p.finalUrl);
+        tvPageUrl.setPaintFlags(tvPageUrl.getPaintFlags()
+                | android.graphics.Paint.UNDERLINE_TEXT_FLAG);
+        // URL halaman bisa di-tap → buka di browser
+        tvPageUrl.setOnClickListener(v -> openBrowser(p.finalUrl));
+        // badge subdomain/host, mis. finance.detik.com
+        String host = hostOf(p.finalUrl);
+        if (!host.isEmpty()) {
+            tvPageHost.setText(host);
+            tvPageHost.setVisibility(View.VISIBLE);
+        } else {
+            tvPageHost.setVisibility(View.GONE);
+        }
         loadThumb(ivPageThumb, p.thumb);
+    }
+
+    /** Host dari URL (tanpa www.), "" bila tidak valid. */
+    private static String hostOf(String url) {
+        if (url == null) return "";
+        try {
+            String h = new URL(url).getHost();
+            return h.startsWith("www.") ? h.substring(4) : h;
+        } catch (Exception e) {
+            return "";
+        }
+    }
+
+    /** Buka URL di browser eksternal. */
+    private void openBrowser(String url) {
+        if (url == null || url.trim().isEmpty()) {
+            toast("URL kosong");
+            return;
+        }
+        try {
+            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
+        } catch (Exception e) {
+            toast("Tidak bisa membuka browser");
+        }
     }
 
     // ---------- filter + list ----------
@@ -456,9 +493,21 @@ public class WebScraperActivity extends AppCompatActivity {
             Article a = items.get(pos);
             h.title.setText(a.title);
             h.url.setText(a.url);
+            h.url.setPaintFlags(h.url.getPaintFlags()
+                    | android.graphics.Paint.UNDERLINE_TEXT_FLAG);
+            // badge host/subdomain per item, mis. finance.detik.com
+            String host = hostOf(a.url);
+            if (!host.isEmpty()) {
+                h.host.setText(host);
+                h.host.setVisibility(View.VISIBLE);
+            } else {
+                h.host.setVisibility(View.GONE);
+            }
             loadThumb(h.thumb, a.thumb);
-            // tap = buka di Reader; tahan = menu (browser/salin/scrape)
+            // tap baris = buka di Reader; tap URL = buka di browser;
+            // tahan = menu (browser/salin/scrape)
             h.itemView.setOnClickListener(v -> openReader(a));
+            h.url.setOnClickListener(v -> openBrowser(a.url));
             h.itemView.setOnLongClickListener(v -> {
                 showArticleMenu(a);
                 return true;
@@ -472,13 +521,14 @@ public class WebScraperActivity extends AppCompatActivity {
 
         class H extends RecyclerView.ViewHolder {
             ImageView thumb;
-            TextView title, url;
+            TextView title, url, host;
 
             H(View v) {
                 super(v);
                 thumb = v.findViewById(R.id.ivArtThumb);
                 title = v.findViewById(R.id.tvArtTitle);
                 url = v.findViewById(R.id.tvArtUrl);
+                host = v.findViewById(R.id.tvArtHost);
             }
         }
     }
@@ -515,7 +565,25 @@ public class WebScraperActivity extends AppCompatActivity {
     private void openReader(Article a) {
         Intent i = new Intent(this, ReaderActivity.class);
         i.putExtra(ReaderActivity.EXTRA_URL, a.url);
+        // kirim daftar artikel untuk section "Artikel terkait" di reader
+        i.putExtra(ReaderActivity.EXTRA_RELATED_JSON, buildRelatedJson());
         startActivity(i);
+    }
+
+    /** Bangun JSON related dari hasil scrape (maks 60, hemat ukuran intent). */
+    private String buildRelatedJson() {
+        List<ReaderActivity.Related> list = new ArrayList<>();
+        int n = Math.min(all.size(), 60);
+        for (int k = 0; k < n; k++) {
+            Article x = all.get(k);
+            ReaderActivity.Related r = new ReaderActivity.Related();
+            r.title = x.title;
+            r.url = x.url;
+            r.thumb = x.thumb;
+            r.savedId = -1;
+            list.add(r);
+        }
+        return ReaderActivity.buildRelatedJson(list);
     }
 
     // ---------- thumbnail loader (background, LruCache) ----------

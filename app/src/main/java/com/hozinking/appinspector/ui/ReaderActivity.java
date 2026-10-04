@@ -2,37 +2,65 @@ package com.hozinking.appinspector.ui;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Typeface;
+import android.graphics.pdf.PdfDocument;
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.text.method.LinkMovementMethod;
+import android.text.util.Linkify;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.FileProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.hozinking.appinspector.R;
 
 import net.dankito.readability4j.Readability4J;
 import net.dankito.readability4j.Article;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.jsoup.HttpStatusException;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.net.UnknownHostException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 /**
  * Layar baca artikel (Hozin Tools).
@@ -52,6 +80,36 @@ public class ReaderActivity extends AppCompatActivity {
     public static final String EXTRA_URL = "url";
     public static final String EXTRA_SAVED_ID = "saved_id";
     public static final String EXTRA_HTML = "html";
+    /**
+     * EXTRA_RELATED_JSON: JSONArray string [{t:title,u:url,h:thumb,s:savedId}].
+     * Dipakai untuk section "Artikel terkait" di bawah reader.
+     */
+    public static final String EXTRA_RELATED_JSON = "related_json";
+
+    /** Satu kandidat artikel terkait. */
+    public static class Related {
+        public String title, url, thumb;
+        public long savedId = -1;
+    }
+
+    /** Bangun JSON related dari list (dipakai pemanggil sebelum startActivity). */
+    public static String buildRelatedJson(List<Related> items) {
+        try {
+            JSONArray arr = new JSONArray();
+            for (Related r : items) {
+                if (r == null) continue;
+                JSONObject o = new JSONObject();
+                o.put("t", r.title != null ? r.title : "");
+                o.put("u", r.url != null ? r.url : "");
+                o.put("h", r.thumb != null ? r.thumb : "");
+                o.put("s", r.savedId);
+                arr.put(o);
+            }
+            return arr.toString();
+        } catch (Exception e) {
+            return "[]";
+        }
+    }
 
     private static final String UA =
             "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 "
@@ -62,12 +120,16 @@ public class ReaderActivity extends AppCompatActivity {
     private ProgressBar progress;
     private TextView tvError;
     private View cardReader;
-    private TextView tvTitle, tvByline, tvExcerpt, tvBody, tvOfflineInfo;
+    private TextView tvTitle, tvByline, tvExcerpt, tvBody, tvOfflineInfo, tvUrl;
     private ImageView ivHero;
-    private Button btnSave;
+    private Button btnSave, btnExport;
+    private View cardRelated;
+    private RecyclerView rvRelated;
 
-    // Artikel yang sedang tampil — dipakai tombol SIMPAN OFFLINE.
+    // Artikel yang sedang tampil — dipakai tombol SIMPAN OFFLINE & EKSPOR.
     private String artTitle, artUrl, artByline, artExcerpt, artText, artHeroUrl;
+    private long artDate;
+    private String relatedJson;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,10 +144,19 @@ public class ReaderActivity extends AppCompatActivity {
         tvExcerpt = findViewById(R.id.tvReaderExcerpt);
         tvBody = findViewById(R.id.tvReaderBody);
         tvOfflineInfo = findViewById(R.id.tvOfflineInfo);
+        tvUrl = findViewById(R.id.tvReaderUrl);
         ivHero = findViewById(R.id.ivReaderHero);
         btnSave = findViewById(R.id.btnSaveOffline);
+        btnExport = findViewById(R.id.btnExportArticle);
+        cardRelated = findViewById(R.id.cardRelated);
+        rvRelated = findViewById(R.id.rvRelated);
+        rvRelated.setLayoutManager(new LinearLayoutManager(this));
 
         btnSave.setOnClickListener(v -> saveOffline());
+        btnExport.setOnClickListener(v -> showExportDialog());
+        tvUrl.setOnClickListener(v -> openBrowser(artUrl));
+
+        relatedJson = getIntent().getStringExtra(EXTRA_RELATED_JSON);
 
         long savedId = getIntent().getLongExtra(EXTRA_SAVED_ID, -1);
         if (savedId >= 0) {
@@ -93,6 +164,20 @@ public class ReaderActivity extends AppCompatActivity {
         } else {
             loadLive(getIntent().getStringExtra(EXTRA_URL),
                     getIntent().getStringExtra(EXTRA_HTML));
+        }
+    }
+
+    /** Buka URL di browser eksternal. */
+    private void openBrowser(String url) {
+        if (url == null || url.trim().isEmpty()) {
+            Toast.makeText(this, "URL kosong", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        try {
+            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
+        } catch (Exception e) {
+            Toast.makeText(this, "Tidak bisa membuka browser",
+                    Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -194,6 +279,7 @@ public class ReaderActivity extends AppCompatActivity {
         artExcerpt = excerpt;
         artText = text;
         artHeroUrl = hero;
+        artDate = System.currentTimeMillis();
     }
 
     // ---------------------------------------------------------------- offline
@@ -226,6 +312,7 @@ public class ReaderActivity extends AppCompatActivity {
                 artExcerpt = item.excerpt;
                 artText = item.content;
                 artHeroUrl = null;
+                artDate = item.savedAt;
                 showArticle(true, item.savedAt);
                 // thumbnail lokal bila ada
                 if (item.thumbPath != null && !item.thumbPath.isEmpty()) {
@@ -255,6 +342,16 @@ public class ReaderActivity extends AppCompatActivity {
             tvByline.setText(host);
         }
 
+        // URL artikel — bisa di-tap untuk buka di browser
+        if (artUrl != null && !artUrl.isEmpty()) {
+            tvUrl.setText(artUrl);
+            tvUrl.setPaintFlags(tvUrl.getPaintFlags()
+                    | android.graphics.Paint.UNDERLINE_TEXT_FLAG);
+            tvUrl.setVisibility(View.VISIBLE);
+        } else {
+            tvUrl.setVisibility(View.GONE);
+        }
+
         if (artExcerpt != null && !artExcerpt.isEmpty()) {
             tvExcerpt.setText(artExcerpt);
             tvExcerpt.setVisibility(View.VISIBLE);
@@ -264,8 +361,15 @@ public class ReaderActivity extends AppCompatActivity {
 
         tvBody.setText(artText != null && !artText.isEmpty()
                 ? artText : "(Isi artikel kosong.)");
+        // URL di dalam teks bisa di-tap
+        Linkify.addLinks(tvBody, Linkify.WEB_URLS);
+        tvBody.setMovementMethod(LinkMovementMethod.getInstance());
 
         cardReader.setVisibility(View.VISIBLE);
+        btnExport.setVisibility(View.VISIBLE);
+
+        // Artikel terkait (dari halaman yang sama)
+        showRelated();
 
         if (offline) {
             btnSave.setVisibility(View.GONE);
@@ -292,6 +396,188 @@ public class ReaderActivity extends AppCompatActivity {
         }
     }
 
+    // ------------------------------------------------- artikel terkait
+
+    /**
+     * Tampilkan "Artikel terkait": dari EXTRA_RELATED_JSON, filter domain sama
+     * + judul mirip (skor overlap kata), buang URL yang sedang dibaca.
+     * Berjalan di background karena bisa ratusan kandidat.
+     */
+    private void showRelated() {
+        cardRelated.setVisibility(View.GONE);
+        if (relatedJson == null || relatedJson.trim().isEmpty()
+                || relatedJson.trim().equals("[]")) {
+            return;
+        }
+        final String curUrl = artUrl;
+        final String curTitle = artTitle;
+        final String json = relatedJson;
+        new Thread(() -> {
+            List<Related> picked = pickRelated(json, curUrl, curTitle);
+            handler.post(() -> {
+                if (isFinishing() || picked.isEmpty()) return;
+                rvRelated.setAdapter(new RelatedAdapter(picked));
+                cardRelated.setVisibility(View.VISIBLE);
+            });
+        }).start();
+    }
+
+    private static List<Related> pickRelated(String json, String curUrl, String curTitle) {
+        List<Related> out = new ArrayList<>();
+        try {
+            String curHost = hostOfStatic(curUrl);
+            Set<String> curWords = words(curTitle);
+            JSONArray arr = new JSONArray(json);
+            List<int[]> scored = new ArrayList<>(); // {index, score}
+            List<Related> cands = new ArrayList<>();
+            for (int i = 0; i < arr.length(); i++) {
+                JSONObject o = arr.optJSONObject(i);
+                if (o == null) continue;
+                String u = o.optString("u", "");
+                if (u.isEmpty() || urlsEqual(u, curUrl)) continue;
+                Related r = new Related();
+                r.title = o.optString("t", "");
+                r.url = u;
+                r.thumb = o.optString("h", "");
+                r.savedId = o.optLong("s", -1);
+                if (r.title.isEmpty()) continue;
+                // skor: domain sama + overlap kata judul
+                int score = 0;
+                if (!curHost.isEmpty() && curHost.equals(hostOfStatic(u))) score += 1000;
+                Set<String> w = words(r.title);
+                int overlap = 0;
+                for (String s : w) if (curWords.contains(s)) overlap++;
+                score += overlap * 10;
+                cands.add(r);
+                scored.add(new int[]{cands.size() - 1, score});
+            }
+            scored.sort((a, b) -> Integer.compare(b[1], a[1]));
+            for (int i = 0; i < Math.min(8, scored.size()); i++) {
+                out.add(cands.get(scored.get(i)[0]));
+            }
+        } catch (Exception ignored) {
+        }
+        return out;
+    }
+
+    private static boolean urlsEqual(String a, String b) {
+        if (a == null || b == null) return false;
+        String na = a.trim().toLowerCase(Locale.US);
+        String nb = b.trim().toLowerCase(Locale.US);
+        if (na.endsWith("/")) na = na.substring(0, na.length() - 1);
+        if (nb.endsWith("/")) nb = nb.substring(0, nb.length() - 1);
+        return na.equals(nb);
+    }
+
+    private static Set<String> words(String s) {
+        Set<String> out = new HashSet<>();
+        if (s == null) return out;
+        for (String w : s.toLowerCase(new Locale("id", "ID")).split("[^a-z0-9]+")) {
+            if (w.length() >= 4) out.add(w);
+        }
+        return out;
+    }
+
+    private static String hostOfStatic(String url) {
+        if (url == null) return "";
+        try {
+            String h = new URL(url).getHost();
+            return h.startsWith("www.") ? h.substring(4) : h;
+        } catch (Exception e) {
+            return "";
+        }
+    }
+
+    private class RelatedAdapter extends RecyclerView.Adapter<RelatedAdapter.H> {
+        private final List<Related> items;
+
+        RelatedAdapter(List<Related> items) {
+            this.items = items;
+        }
+
+        @NonNull
+        @Override
+        public H onCreateViewHolder(@NonNull ViewGroup p, int v) {
+            View view = LayoutInflater.from(p.getContext())
+                    .inflate(R.layout.row_article, p, false);
+            return new H(view);
+        }
+
+        @Override
+        public void onBindViewHolder(@NonNull H h, int pos) {
+            Related r = items.get(pos);
+            h.title.setText(r.title);
+            h.url.setText(r.url);
+            String host = hostOfStatic(r.url);
+            if (!host.isEmpty()) {
+                h.host.setText(host);
+                h.host.setVisibility(View.VISIBLE);
+            } else {
+                h.host.setVisibility(View.GONE);
+            }
+            loadRelatedThumb(h.thumb, r.thumb);
+            h.itemView.setOnClickListener(v -> openRelated(r));
+            h.url.setOnClickListener(v -> openBrowser(r.url));
+        }
+
+        @Override
+        public int getItemCount() {
+            return items.size();
+        }
+
+        class H extends RecyclerView.ViewHolder {
+            ImageView thumb;
+            TextView title, url, host;
+
+            H(View v) {
+                super(v);
+                thumb = v.findViewById(R.id.ivArtThumb);
+                title = v.findViewById(R.id.tvArtTitle);
+                url = v.findViewById(R.id.tvArtUrl);
+                host = v.findViewById(R.id.tvArtHost);
+            }
+        }
+    }
+
+    private void openRelated(Related r) {
+        Intent i = new Intent(this, ReaderActivity.class);
+        if (r.savedId >= 0) {
+            i.putExtra(EXTRA_SAVED_ID, r.savedId);
+        } else {
+            i.putExtra(EXTRA_URL, r.url);
+        }
+        i.putExtra(EXTRA_RELATED_JSON, relatedJson);
+        startActivity(i);
+    }
+
+    /** Thumb related: dukung URL http(s) maupun path file lokal (offline). */
+    private void loadRelatedThumb(ImageView iv, String thumb) {
+        if (thumb == null || thumb.isEmpty() || thumb.startsWith("data:")) {
+            iv.setImageDrawable(null);
+            iv.setTag(null);
+            return;
+        }
+        iv.setTag(thumb);
+        iv.setImageDrawable(null);
+        new Thread(() -> {
+            Bitmap bmp = null;
+            try {
+                if (thumb.startsWith("/")) {
+                    bmp = BitmapFactory.decodeFile(thumb);
+                } else {
+                    bmp = fetchBitmap(thumb);
+                }
+            } catch (Exception ignored) {
+            }
+            final Bitmap fbm = bmp;
+            handler.post(() -> {
+                if (!isFinishing() && thumb.equals(iv.getTag()) && fbm != null) {
+                    iv.setImageBitmap(fbm);
+                }
+            });
+        }).start();
+    }
+
     // ------------------------------------------------------------------ simpan
 
     private void saveOffline() {
@@ -316,6 +602,219 @@ public class ReaderActivity extends AppCompatActivity {
                 btnSave.setEnabled(true);
             });
         }).start();
+    }
+
+    // ------------------------------------------------------------------ ekspor
+
+    /** Dialog pilihan ekspor: JSON / PDF / salin teks. */
+    private void showExportDialog() {
+        new MaterialAlertDialogBuilder(this)
+                .setTitle("Ekspor artikel")
+                .setItems(new CharSequence[]{
+                        "JSON (judul, URL, tanggal, teks)",
+                        "PDF (judul + isi)",
+                        "Salin teks ke clipboard"
+                }, (d, which) -> {
+                    if (which == 0) {
+                        exportJson();
+                    } else if (which == 1) {
+                        exportPdf();
+                    } else {
+                        copyText();
+                    }
+                })
+                .show();
+    }
+
+    private void copyText() {
+        StringBuilder sb = new StringBuilder();
+        if (artTitle != null) sb.append(artTitle).append("\n");
+        if (artUrl != null) sb.append(artUrl).append("\n");
+        sb.append("\n");
+        if (artText != null) sb.append(artText);
+        ClipboardManager cm = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
+        cm.setPrimaryClip(ClipData.newPlainText("artikel", sb.toString().trim()));
+        Toast.makeText(this, "Teks artikel disalin", Toast.LENGTH_SHORT).show();
+    }
+
+    private void exportJson() {
+        btnExport.setEnabled(false);
+        Toast.makeText(this, "Menyiapkan JSON...", Toast.LENGTH_SHORT).show();
+        new Thread(() -> {
+            String err = null;
+            File outFile = null;
+            try {
+                JSONObject o = new JSONObject();
+                o.put("title", artTitle != null ? artTitle : "");
+                o.put("url", artUrl != null ? artUrl : "");
+                o.put("date", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss",
+                        Locale.US).format(new Date(artDate)));
+                o.put("text", artText != null ? artText : "");
+
+                File dir = new File(getExternalFilesDir("exports"), "");
+                if (!dir.exists() && !dir.mkdirs()) {
+                    throw new Exception("gagal buat folder export");
+                }
+                outFile = new File(dir, "artikel_"
+                        + new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US)
+                        .format(new Date()) + ".json");
+                Files.write(outFile.toPath(),
+                        o.toString(2).getBytes(StandardCharsets.UTF_8));
+            } catch (Exception e) {
+                err = e.getMessage();
+            }
+            final String ferr = err;
+            final File ffile = outFile;
+            handler.post(() -> {
+                btnExport.setEnabled(true);
+                if (ferr != null) {
+                    Toast.makeText(this, "Export gagal: " + ferr,
+                            Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                shareFile(ffile, "application/json", "Bagikan JSON");
+            });
+        }).start();
+    }
+
+    /** Ekspor PDF sederhana via PdfDocument bawaan (tanpa library tambahan). */
+    private void exportPdf() {
+        btnExport.setEnabled(false);
+        Toast.makeText(this, "Membuat PDF...", Toast.LENGTH_SHORT).show();
+        new Thread(() -> {
+            String err = null;
+            File outFile = null;
+            PdfDocument doc = new PdfDocument();
+            try {
+                Paint titlePaint = new Paint();
+                titlePaint.setColor(Color.BLACK);
+                titlePaint.setTextSize(20);
+                titlePaint.setTypeface(
+                        Typeface.create(Typeface.DEFAULT, Typeface.BOLD));
+                Paint metaPaint = new Paint();
+                metaPaint.setColor(Color.DKGRAY);
+                metaPaint.setTextSize(11);
+                Paint bodyPaint = new Paint();
+                bodyPaint.setColor(Color.BLACK);
+                bodyPaint.setTextSize(12);
+
+                PdfWriter w = new PdfWriter(doc);
+                w.drawPara(artTitle != null ? artTitle : "(tanpa judul)",
+                        titlePaint, 30);
+                String meta = hostOf(artUrl) + " • "
+                        + new SimpleDateFormat("dd MMM yyyy HH:mm",
+                        new Locale("id", "ID")).format(new Date(artDate));
+                w.drawPara(meta, metaPaint, 18);
+                if (artUrl != null && !artUrl.isEmpty()) {
+                    w.drawPara(artUrl, metaPaint, 18);
+                }
+                w.drawPara("", bodyPaint, 12);
+                String body = artText != null ? artText : "";
+                for (String para : body.split("\n")) {
+                    String p = para.trim();
+                    if (!p.isEmpty()) w.drawPara(p, bodyPaint, 20);
+                }
+                w.finish();
+
+                File dir = new File(getExternalFilesDir("exports"), "");
+                if (!dir.exists() && !dir.mkdirs()) {
+                    throw new Exception("gagal buat folder export");
+                }
+                outFile = new File(dir, "artikel_"
+                        + new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US)
+                        .format(new Date()) + ".pdf");
+                FileOutputStream fos = new FileOutputStream(outFile);
+                doc.writeTo(fos);
+                fos.close();
+            } catch (Exception e) {
+                err = e.getMessage();
+            } finally {
+                doc.close();
+            }
+            final String ferr = err;
+            final File ffile = outFile;
+            handler.post(() -> {
+                btnExport.setEnabled(true);
+                if (ferr != null) {
+                    Toast.makeText(this, "Export gagal: " + ferr,
+                            Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                shareFile(ffile, "application/pdf", "Bagikan PDF");
+            });
+        }).start();
+    }
+
+    /** Bagikan file via FileProvider (pola yang sudah ada). */
+    private void shareFile(File f, String mime, String chooserTitle) {
+        try {
+            Uri uri = FileProvider.getUriForFile(this,
+                    getPackageName() + ".fileprovider", f);
+            Intent share = new Intent(Intent.ACTION_SEND);
+            share.setType(mime);
+            share.putExtra(Intent.EXTRA_STREAM, uri);
+            share.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            startActivity(Intent.createChooser(share, chooserTitle));
+        } catch (Exception e) {
+            Toast.makeText(this, "Tersimpan: " + f.getAbsolutePath(),
+                    Toast.LENGTH_LONG).show();
+        }
+    }
+
+    /**
+     * Penulis PDF sederhana: teks di-wrap per paragraf dengan pagination
+     * otomatis (A4 595x842pt, margin 48pt).
+     */
+    private static class PdfWriter {
+        private final PdfDocument doc;
+        private PdfDocument.Page page;
+        private int y;
+        private static final int PW = 595, PH = 842, M = 48;
+
+        PdfWriter(PdfDocument doc) {
+            this.doc = doc;
+            newPage();
+        }
+
+        private void newPage() {
+            if (page != null) doc.finishPage(page);
+            PdfDocument.PageInfo pi =
+                    new PdfDocument.PageInfo.Builder(PW, PH, 1).create();
+            page = doc.startPage(pi);
+            y = M;
+        }
+
+        void drawPara(String text, Paint paint, int lineH) {
+            if (text == null) text = "";
+            float maxW = PW - 2 * M;
+            int start = 0;
+            boolean drew = false;
+            while (start < text.length()) {
+                int count = paint.breakText(text, start, text.length(),
+                        true, maxW, null);
+                if (count <= 0) break;
+                int end = start + count;
+                if (end < text.length()) {
+                    int sp = text.lastIndexOf(' ', end);
+                    if (sp > start) end = sp + 1;
+                }
+                if (y + lineH > PH - M) newPage();
+                page.getCanvas().drawText(text, start, end, M, y, paint);
+                y += lineH;
+                drew = true;
+                start = end;
+                while (start < text.length() && text.charAt(start) == ' ') start++;
+            }
+            if (!drew) y += lineH / 2; // paragraf kosong = spasi kecil
+            else y += lineH / 3;       // jeda antar paragraf
+        }
+
+        void finish() {
+            if (page != null) {
+                doc.finishPage(page);
+                page = null;
+            }
+        }
     }
 
     // ------------------------------------------------------------------ util

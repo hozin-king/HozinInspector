@@ -76,6 +76,19 @@
                 android:textSize="12sp" />
 
             <TextView
+                android:id="@+id/tvReaderUrl"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:clickable="true"
+                android:ellipsize="middle"
+                android:focusable="true"
+                android:fontFamily="monospace"
+                android:maxLines="1"
+                android:textColor="#7FD4FF"
+                android:textSize="11sp" />
+
+            <TextView
                 android:id="@+id/tvReaderExcerpt"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -113,6 +126,16 @@
             android:text="SIMPAN OFFLINE"
             android:visibility="gone" />
 
+        <!-- Tombol ekspor: JSON / PDF / salin teks -->
+        <Button
+            android:id="@+id/btnExportArticle"
+            style="@style/HiButtonGlass"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="EKSPOR (JSON / PDF / SALIN TEKS)"
+            android:visibility="gone" />
+
         <!-- Info mode offline -->
         <TextView
             android:id="@+id/tvOfflineInfo"
@@ -122,5 +145,36 @@
             android:layout_marginTop="12dp"
             android:gravity="center"
             android:visibility="gone" />
+
+        <!-- Artikel terkait / selanjutnya -->
+        <LinearLayout
+            android:id="@+id/cardRelated"
+            style="@style/HiCard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="16dp"
+            android:visibility="gone">
+
+            <TextView
+                style="@style/HiSectionTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Artikel terkait" />
+
+            <TextView
+                style="@style/HiSectionDesc"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:text="Dari halaman yang sama, diurutkan yang paling mirip." />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvRelated"
+                android:layout_width="match_parent"
+                android:layout_height="360dp"
+                android:layout_marginTop="8dp"
+                android:nestedScrollingEnabled="true" />
+        </LinearLayout>
     </LinearLayout>
 </ScrollView>
