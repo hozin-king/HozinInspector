@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="8dp">
+
+    <EditText
+        android:id="@+id/etSearch"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Cari class... (cth: Tools)"
+        android:inputType="text"
+        android:imeOptions="actionSearch" />
+
+    <TextView
+        android:id="@+id/tvClassCount"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:text="Memuat..."
+        android:textSize="12sp" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:text="Tap nama class untuk lihat method-nya. Centang untuk di-hook."
+        android:textSize="12sp" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvClasses"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginTop="4dp" />
+
+    <Button
+        android:id="@+id/btnSaveClasses"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="SIMPAN PILIHAN" />
+</LinearLayout>

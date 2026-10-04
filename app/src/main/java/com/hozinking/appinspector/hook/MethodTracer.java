@@ -24,6 +24,10 @@ public class MethodTracer {
 
     public static void install(XC_LoadPackage.LoadPackageParam lpparam, HiConfig cfg) {
         final List<String> prefixes = cfg.traceClasses;
+        final Set<String> exact = Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>());
+        exact.addAll(cfg.hookClasses);
+        final boolean rateLimit = cfg.rateLimit;
+        TRACE_HOOK_LIMITED = rateLimit;
         XposedHelpers.findAndHookMethod(ClassLoader.class, "loadClass", String.class,
                 new XC_MethodHook() {
                     @Override
@@ -34,18 +38,22 @@ public class MethodTracer {
                             if (!(res instanceof Class)) return;
                             Class<?> cls = (Class<?>) res;
                             String name = cls.getName();
-                            if (!matches(name, prefixes)) return;
+                            if (!matches(name, prefixes, exact)) return;
                             hookClass(cls);
                         } catch (Throwable ignored) {
                         }
                     }
                 });
-        HiLog.i("MT", "method tracer armed, prefixes=" + prefixes);
+        HiLog.i("MT", "method tracer armed, prefixes=" + prefixes.size()
+                + " exact=" + exact.size() + " rateLimit=" + rateLimit);
     }
 
-    private static boolean matches(String name, List<String> prefixes) {
+    private static volatile boolean TRACE_HOOK_LIMITED = true;
+
+    private static boolean matches(String name, List<String> prefixes, Set<String> exact) {
         if (name.startsWith("com.hozinking.appinspector.")) return false;
         if (name.startsWith("de.robv.")) return false;
+        if (exact.contains(name)) return true;
         for (String p : prefixes) {
             if (p != null && !p.isEmpty() && name.startsWith(p)) return true;
         }
@@ -79,6 +87,7 @@ public class MethodTracer {
         @Override
         protected void beforeHookedMethod(MethodHookParam param) {
             try {
+                if (TRACE_HOOK_LIMITED && !RateLimiter.allow("MT")) return;
                 StringBuilder sb = new StringBuilder();
                 sb.append("CALL ")
                         .append(HiLog.shortName(param.method.getDeclaringClass().getName()))
@@ -97,6 +106,7 @@ public class MethodTracer {
         @Override
         protected void afterHookedMethod(MethodHookParam param) {
             try {
+                if (TRACE_HOOK_LIMITED && !RateLimiter.allow("MT")) return;
                 String ret = param.hasThrowable()
                         ? "THROW " + HiLog.safe(param.getThrowable(), 200)
                         : "-> " + HiLog.safe(param.getResult(), 200);

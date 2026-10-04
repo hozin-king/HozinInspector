@@ -1,146 +1,318 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:fillViewport="true">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="16dp">
+        android:padding="12dp">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="HozinInspector"
-            android:textSize="24sp"
-            android:textStyle="bold" />
+        <!-- Header + status -->
+        <com.google.android.material.card.MaterialCardView
+            style="@style/HiCard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:text="App inspector universal (modul LSPosed)"
-            android:textSize="14sp" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:text="App target:"
-            android:textStyle="bold" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="HozinInspector"
+                    android:textSize="22sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/hi_accent" />
 
-        <LinearLayout
+                <TextView
+                    style="@style/HiSectionDesc"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="App inspector universal (modul LSPosed)" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/tvGrantStatus"
+                        style="@style/HiStatusPill"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="8dp"
+                        android:background="@color/hi_badge_other"
+                        android:text="READ_LOGS: ..."
+                        android:textColor="#FFFFFF" />
+
+                    <TextView
+                        android:id="@+id/tvModuleStatus"
+                        style="@style/HiStatusPill"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@color/hi_badge_other"
+                        android:text="MODUL: ..."
+                        android:textColor="#FFFFFF" />
+                </LinearLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- App target -->
+        <com.google.android.material.card.MaterialCardView
+            style="@style/HiCard"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:layout_marginTop="12dp">
 
-            <TextView
-                android:id="@+id/tvTarget"
-                android:layout_width="0dp"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:layout_weight="1"
-                android:text="(belum dipilih)" />
+                android:orientation="vertical">
 
-            <Button
-                android:id="@+id/btnPick"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Pilih" />
-        </LinearLayout>
+                <TextView
+                    style="@style/HiSectionTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="App target" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:text="Fitur:"
-            android:textStyle="bold" />
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
 
-        <CheckBox
-            android:id="@+id/cbMethod"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Method tracer" />
+                    <TextView
+                        android:id="@+id/tvTarget"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:fontFamily="monospace"
+                        android:text="(belum dipilih)"
+                        android:textSize="13sp" />
 
-        <CheckBox
-            android:id="@+id/cbUrl"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="URL tracker" />
+                    <Button
+                        android:id="@+id/btnPick"
+                        style="@style/Widget.Material3.Button.OutlinedButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Pilih" />
+                </LinearLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
 
-        <CheckBox
-            android:id="@+id/cbUi"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="UI interaction tracer" />
-
-        <CheckBox
-            android:id="@+id/cbPref"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Pref access tracer" />
-
-        <CheckBox
-            android:id="@+id/cbDump"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Dump layout (on-demand)" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:text="Filter class prefix (method tracer):"
-            android:textStyle="bold" />
-
-        <LinearLayout
+        <!-- Fitur tracer -->
+        <com.google.android.material.card.MaterialCardView
+            style="@style/HiCard"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:layout_marginTop="12dp">
 
-            <EditText
-                android:id="@+id/etPrefix"
-                android:layout_width="0dp"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:hint="cth: com.contoh.app."
-                android:inputType="text" />
+                android:orientation="vertical">
 
-            <Button
-                android:id="@+id/btnAdd"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Tambah" />
-        </LinearLayout>
+                <TextView
+                    style="@style/HiSectionTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Fitur tracer" />
 
-        <TextView
-            android:id="@+id/tvPrefixes"
+                <CheckBox
+                    android:id="@+id/cbMethod"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="Method tracer" />
+
+                <CheckBox
+                    android:id="@+id/cbUrl"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="URL tracker" />
+
+                <CheckBox
+                    android:id="@+id/cbUi"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="UI interaction tracer" />
+
+                <CheckBox
+                    android:id="@+id/cbPref"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Pref access tracer" />
+
+                <CheckBox
+                    android:id="@+id/cbDump"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Dump layout (on-demand)" />
+
+                <CheckBox
+                    android:id="@+id/cbRate"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:checked="true"
+                    android:text="Batasi log 50/detik (anti-lag)" />
+
+                <TextView
+                    style="@style/HiSectionDesc"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="Rate limit mencegah target freeze saat method ramai dipanggil." />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Filter prefix -->
+        <com.google.android.material.card.MaterialCardView
+            style="@style/HiCard"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:text="(kosong)" />
+            android:layout_marginTop="12dp">
 
-        <LinearLayout
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    style="@style/HiSectionTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Filter class prefix" />
+
+                <TextView
+                    style="@style/HiSectionDesc"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="Opsional — hook semua class yang diawali prefix ini." />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:orientation="horizontal">
+
+                    <EditText
+                        android:id="@+id/etPrefix"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:hint="cth: com.contoh.app."
+                        android:inputType="text"
+                        android:fontFamily="monospace"
+                        android:textSize="13sp" />
+
+                    <Button
+                        android:id="@+id/btnAdd"
+                        style="@style/Widget.Material3.Button.OutlinedButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Tambah" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/tvPrefixes"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:fontFamily="monospace"
+                    android:text="(kosong)"
+                    android:textSize="12sp" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:orientation="horizontal">
+
+                    <Button
+                        android:id="@+id/btnDelLast"
+                        style="@style/Widget.Material3.Button.OutlinedButton"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Hapus terakhir" />
+
+                    <Button
+                        android:id="@+id/btnDelAll"
+                        style="@style/Widget.Material3.Button.OutlinedButton"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:layout_weight="1"
+                        android:text="Hapus semua" />
+                </LinearLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Hook class exact -->
+        <com.google.android.material.card.MaterialCardView
+            style="@style/HiCard"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:layout_marginTop="12dp">
 
-            <Button
-                android:id="@+id/btnDelLast"
-                android:layout_width="0dp"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Hapus terakhir" />
+                android:orientation="vertical">
 
-            <Button
-                android:id="@+id/btnDelAll"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Hapus semua" />
-        </LinearLayout>
+                <TextView
+                    style="@style/HiSectionTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Hook class (pilihan exact)" />
 
+                <TextView
+                    style="@style/HiSectionDesc"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="Pilih class spesifik dari daftar semua class di APK target." />
+
+                <TextView
+                    android:id="@+id/tvHookClasses"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="0 class dipilih"
+                    android:textSize="13sp" />
+
+                <TextView
+                    android:id="@+id/tvHookWarn"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="⚠ &gt;20 class: kebanyakan hook bisa bikin target lag/FC/ANR."
+                    android:textColor="@color/hi_red"
+                    android:textSize="12sp"
+                    android:visibility="gone" />
+
+                <Button
+                    android:id="@+id/btnPickClass"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="PILIH CLASS" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Aksi -->
         <Button
             android:id="@+id/btnSave"
             android:layout_width="match_parent"
@@ -150,6 +322,7 @@
 
         <Button
             android:id="@+id/btnGrant"
+            style="@style/Widget.Material3.Button.OutlinedButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
@@ -163,6 +336,7 @@
 
             <Button
                 android:id="@+id/btnLog"
+                style="@style/Widget.Material3.Button.OutlinedButton"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -170,8 +344,10 @@
 
             <Button
                 android:id="@+id/btnManifest"
+                style="@style/Widget.Material3.Button.OutlinedButton"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
                 android:layout_weight="1"
                 android:text="Lihat Manifest" />
         </LinearLayout>
@@ -180,7 +356,10 @@
             android:id="@+id/tvStatus"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:text="" />
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="16dp"
+            android:fontFamily="monospace"
+            android:text=""
+            android:textSize="12sp" />
     </LinearLayout>
 </ScrollView>

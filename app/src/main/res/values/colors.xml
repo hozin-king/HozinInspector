@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Dark hacker aesthetic -->
+    <color name="hi_bg">#121212</color>
+    <color name="hi_card">#1E1E1E</color>
+    <color name="hi_accent">#00E5A0</color>
+    <color name="hi_accent_dark">#00563F</color>
+    <color name="hi_text">#E8E8E8</color>
+    <color name="hi_text_dim">#9E9E9E</color>
+    <color name="hi_green">#4CAF50</color>
+    <color name="hi_red">#F44336</color>
+
+    <!-- Badge TAG log -->
+    <color name="hi_badge_method">#2196F3</color>
+    <color name="hi_badge_url">#4CAF50</color>
+    <color name="hi_badge_ui">#9C27B0</color>
+    <color name="hi_badge_pref">#FF9800</color>
+    <color name="hi_badge_layout">#009688</color>
+    <color name="hi_badge_other">#616161</color>
+    <color name="hi_badge_err">#F44336</color>
+</resources>

@@ -24,6 +24,12 @@
         <activity
             android:name=".ui.ManifestActivity"
             android:exported="false" />
+        <activity
+            android:name=".ui.ClassPickerActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.MethodListActivity"
+            android:exported="false" />
 
         <!-- LSPosed / Xposed module declaration -->
         <meta-data

@@ -18,6 +18,10 @@ public class HiConfig {
     public String targetPackage = "";
     public boolean methodTrace = false;
     public List<String> traceClasses = new ArrayList<>();
+    /** Nama class exact yang dipilih user di layar "Pilih Class". */
+    public List<String> hookClasses = new ArrayList<>();
+    /** Batasi log method tracer maks 50/detik per tag (anti-lag). */
+    public boolean rateLimit = true;
     public boolean urlTrack = false;
     public boolean uiTrace = false;
     public boolean prefTrace = false;
@@ -49,6 +53,14 @@ public class HiConfig {
                         if (!s.isEmpty()) cfg.traceClasses.add(s);
                     }
                 }
+                JSONArray hooks = o.optJSONArray("hookClasses");
+                if (hooks != null) {
+                    for (int i = 0; i < hooks.length(); i++) {
+                        String s = hooks.optString(i, "");
+                        if (!s.isEmpty()) cfg.hookClasses.add(s);
+                    }
+                }
+                cfg.rateLimit = o.optBoolean("rateLimit", true);
                 break; // pakai file pertama yang ketemu
             } catch (Exception ignored) {
             }
