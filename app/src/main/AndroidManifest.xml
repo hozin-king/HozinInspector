@@ -30,6 +30,24 @@
         <activity
             android:name=".ui.MethodListActivity"
             android:exported="false" />
+        <activity
+            android:name=".ui.AppPickerActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.RootToolsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.PrefViewerActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.DbViewerActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.FileExplorerActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.MapsActivity"
+            android:exported="false" />
 
         <!-- LSPosed / Xposed module declaration -->
         <meta-data

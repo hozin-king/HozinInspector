@@ -1,11 +1,10 @@
 package com.hozinking.appinspector.ui;
 
 import android.Manifest;
-import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -29,7 +28,6 @@ import java.io.FileReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -42,10 +40,11 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String PREFS = "hozininspector";
     private static final int REQ_PICK_CLASS = 1001;
+    private static final int REQ_PICK_APP = 1002;
     private static final int WARN_HOOK_LIMIT = 20;
 
     private TextView tvTarget, tvPrefixes, tvStatus, tvHookClasses, tvHookWarn,
-            tvGrantStatus, tvModuleStatus;
+            tvGrantStatus, tvModuleStatus, tvClassSummary;
     private EditText etPrefix;
     private CheckBox cbMethod, cbUrl, cbUi, cbPref, cbDump, cbRate;
     private Button btnSave;
@@ -66,6 +65,7 @@ public class MainActivity extends AppCompatActivity {
         tvHookWarn = findViewById(R.id.tvHookWarn);
         tvGrantStatus = findViewById(R.id.tvGrantStatus);
         tvModuleStatus = findViewById(R.id.tvModuleStatus);
+        tvClassSummary = findViewById(R.id.tvClassSummary);
         etPrefix = findViewById(R.id.etPrefix);
         cbMethod = findViewById(R.id.cbMethod);
         cbUrl = findViewById(R.id.cbUrl);
@@ -78,6 +78,7 @@ public class MainActivity extends AppCompatActivity {
         restoreUiState();
         renderPrefixes();
         renderHookClasses();
+        if (!targetPackage.isEmpty()) updateClassSummary();
 
         // setiap perubahan checkbox langsung disimpan (anti-reset)
         CheckBox[] boxes = {cbMethod, cbUrl, cbUi, cbPref, cbDump, cbRate};
@@ -85,7 +86,8 @@ public class MainActivity extends AppCompatActivity {
             cb.setOnCheckedChangeListener((b, checked) -> persistUiState());
         }
 
-        findViewById(R.id.btnPick).setOnClickListener(v -> pickApp());
+        findViewById(R.id.btnPick).setOnClickListener(v ->
+                startActivityForResult(new Intent(this, AppPickerActivity.class), REQ_PICK_APP));
         findViewById(R.id.btnAdd).setOnClickListener(v -> addPrefix());
         findViewById(R.id.btnDelLast).setOnClickListener(v -> {
             if (!prefixes.isEmpty()) prefixes.remove(prefixes.size() - 1);
@@ -105,6 +107,15 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.btnManifest).setOnClickListener(v -> {
             Intent i = new Intent(this, ManifestActivity.class);
             i.putExtra("pkg", targetPackage);
+            startActivity(i);
+        });
+        findViewById(R.id.btnRootTools).setOnClickListener(v -> {
+            if (targetPackage.isEmpty()) {
+                toast("Pilih app target dulu");
+                return;
+            }
+            Intent i = new Intent(this, RootToolsActivity.class);
+            i.putExtra(RootToolsActivity.EXTRA_PKG, targetPackage);
             startActivity(i);
         });
     }
@@ -191,49 +202,31 @@ public class MainActivity extends AppCompatActivity {
         tvModuleStatus.setBackgroundColor(active ? 0xFF4CAF50 : 0xFF616161);
     }
 
-    // ---------- pilih app (background thread!) ----------
+    // ---------- pilih app via AppPickerActivity ----------
 
-    private void pickApp() {
-        final AlertDialog loading = new AlertDialog.Builder(this)
-                .setMessage("Memuat daftar aplikasi...")
-                .setCancelable(false)
-                .create();
-        loading.show();
+    /**
+     * Setelah app target dipilih: parse dex dari sourceDir-nya di background
+     * thread dan tampilkan ringkasan jumlah class di layar utama.
+     */
+    private void updateClassSummary() {
+        tvClassSummary.setText("Menghitung class dari APK...");
+        final String target = targetPackage;
         new Thread(() -> {
+            int count = -1;
             try {
-                PackageManager pm = getPackageManager();
-                Intent main = new Intent(Intent.ACTION_MAIN);
-                main.addCategory(Intent.CATEGORY_LAUNCHER);
-                List<ResolveInfo> ris = pm.queryIntentActivities(main, 0);
-                List<String[]> pairs = new ArrayList<>();
-                for (ResolveInfo ri : ris) {
-                    String pkg = ri.activityInfo.packageName;
-                    if (pkg.equals(getPackageName())) continue;
-                    CharSequence label = ri.loadLabel(pm);
-                    pairs.add(new String[]{label == null ? pkg : label.toString(), pkg});
-                }
-                Collections.sort(pairs, (a, b) -> a[0].compareToIgnoreCase(b[0]));
-                final String[] items = new String[pairs.size()];
-                for (int i = 0; i < pairs.size(); i++) {
-                    items[i] = pairs.get(i)[0] + "\n" + pairs.get(i)[1];
-                }
-                handler.post(() -> {
-                    loading.dismiss();
-                    new AlertDialog.Builder(this)
-                            .setTitle("Pilih app target")
-                            .setItems(items, (d, which) -> {
-                                targetPackage = pairs.get(which)[1];
-                                tvTarget.setText(targetPackage);
-                                persistUiState();
-                            })
-                            .show();
-                });
-            } catch (final Exception e) {
-                handler.post(() -> {
-                    loading.dismiss();
-                    toast("Gagal: " + e.getMessage());
-                });
+                ApplicationInfo ai = getPackageManager().getApplicationInfo(target, 0);
+                count = DexParser.listClasses(ai.sourceDir).size();
+            } catch (Exception ignored) {
             }
+            final int c = count;
+            handler.post(() -> {
+                if (c >= 0) {
+                    tvClassSummary.setText(String.format("%,d", c).replace(',', '.')
+                            + " class tersedia — tap PILIH CLASS untuk memilih yang di-hook");
+                } else {
+                    tvClassSummary.setText("Gagal baca class dari APK");
+                }
+            });
         }).start();
     }
 
@@ -254,6 +247,15 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQ_PICK_APP && resultCode == RESULT_OK && data != null) {
+            String picked = data.getStringExtra(AppPickerActivity.RESULT_PKG);
+            if (picked != null && !picked.isEmpty()) {
+                targetPackage = picked;
+                tvTarget.setText(targetPackage);
+                persistUiState();
+                updateClassSummary();
+            }
+        }
         if (requestCode == REQ_PICK_CLASS && resultCode == RESULT_OK && data != null) {
             ArrayList<String> sel =
                     data.getStringArrayListExtra(ClassPickerActivity.RESULT_SELECTED);

@@ -309,6 +309,15 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
                     android:text="PILIH CLASS" />
+
+                <TextView
+                    android:id="@+id/tvClassSummary"
+                    style="@style/HiSectionDesc"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:fontFamily="monospace"
+                    android:text="" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
@@ -351,6 +360,14 @@
                 android:layout_weight="1"
                 android:text="Lihat Manifest" />
         </LinearLayout>
+
+        <Button
+            android:id="@+id/btnRootTools"
+            style="@style/Widget.Material3.Button.OutlinedButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="ROOT TOOLS (butuh root)" />
 
         <TextView
             android:id="@+id/tvStatus"
