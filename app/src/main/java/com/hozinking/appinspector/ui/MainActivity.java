@@ -109,6 +109,8 @@ public class MainActivity extends AppCompatActivity {
             i.putExtra("pkg", targetPackage);
             startActivity(i);
         });
+        findViewById(R.id.btnWebScraper).setOnClickListener(v ->
+                startActivity(new Intent(this, WebScraperActivity.class)));
         findViewById(R.id.btnRootTools).setOnClickListener(v -> {
             if (targetPackage.isEmpty()) {
                 toast("Pilih app target dulu");

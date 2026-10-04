@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Hozin Tools — Web Scraper (glassmorphism) -->
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="12dp">
+
+        <!-- Header -->
+        <LinearLayout
+            style="@style/HiCard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                style="@style/HiAppTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Web Scraper" />
+
+            <TextView
+                style="@style/HiSectionDesc"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:text="Ambil judul, deskripsi, thumbnail &amp; daftar artikel dari halaman web." />
+        </LinearLayout>
+
+        <!-- Input URL -->
+        <LinearLayout
+            style="@style/HiCard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp">
+
+            <TextView
+                style="@style/HiSectionTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="URL halaman" />
+
+            <EditText
+                android:id="@+id/etScrapeUrl"
+                style="@style/HiSearchField"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:hint="https://contoh.com/berita"
+                android:inputType="textUri"
+                android:singleLine="true" />
+
+            <Button
+                android:id="@+id/btnScrape"
+                style="@style/HiButtonPrimary"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:text="SCRAPE" />
+
+            <TextView
+                android:id="@+id/tvScrapeStatus"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:fontFamily="monospace"
+                android:text=""
+                android:textSize="12sp" />
+        </LinearLayout>
+
+        <!-- Info halaman -->
+        <LinearLayout
+            android:id="@+id/cardPageInfo"
+            style="@style/HiCard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:visibility="gone">
+
+            <ImageView
+                android:id="@+id/ivPageThumb"
+                android:layout_width="match_parent"
+                android:layout_height="180dp"
+                android:background="@drawable/search_bg"
+                android:scaleType="centerCrop" />
+
+            <TextView
+                android:id="@+id/tvPageTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:textColor="#FFFFFF"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tvPageDesc"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:ellipsize="end"
+                android:maxLines="5"
+                android:textColor="#CCFFFFFF"
+                android:textSize="13sp" />
+
+            <TextView
+                android:id="@+id/tvPageUrl"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:fontFamily="monospace"
+                android:textColor="#80FFFFFF"
+                android:textIsSelectable="true"
+                android:textSize="11sp" />
+        </LinearLayout>
+
+        <!-- Daftar artikel -->
+        <LinearLayout
+            android:id="@+id/cardArticles"
+            style="@style/HiCard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="16dp"
+            android:visibility="gone">
+
+            <TextView
+                android:id="@+id/tvArticleCount"
+                style="@style/HiSectionTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0 artikel" />
+
+            <EditText
+                android:id="@+id/etArticleSearch"
+                style="@style/HiSearchField"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:hint="Cari artikel..."
+                android:inputType="text"
+                android:singleLine="true" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/btnCopyAll"
+                    style="@style/HiButtonGlass"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Salin Semua" />
+
+                <Button
+                    android:id="@+id/btnExportJson"
+                    style="@style/HiButtonGlass"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_weight="1"
+                    android:text="Export JSON" />
+            </LinearLayout>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvArticles"
+                android:layout_width="match_parent"
+                android:layout_height="420dp"
+                android:layout_marginTop="8dp"
+                android:nestedScrollingEnabled="true" />
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- FileProvider paths: folder export JSON Web Scraper -->
+<paths>
+    <external-files-path name="scrapes" path="scrapes/" />
+</paths>

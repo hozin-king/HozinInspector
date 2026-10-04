@@ -3,6 +3,7 @@
 
     <uses-permission android:name="android.permission.READ_LOGS" />
     <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <application
         android:allowBackup="true"
@@ -10,7 +11,8 @@
         android:icon="@mipmap/ic_launcher"
         android:roundIcon="@mipmap/ic_launcher"
         android:theme="@style/Theme.HozinTools"
-        android:supportsRtl="true">
+        android:supportsRtl="true"
+        android:usesCleartextTraffic="true">
 
         <activity
             android:name=".ui.MainActivity"
@@ -50,6 +52,20 @@
         <activity
             android:name=".ui.MapsActivity"
             android:exported="false" />
+        <activity
+            android:name=".ui.WebScraperActivity"
+            android:exported="false" />
+
+        <!-- FileProvider untuk share hasil export JSON -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="com.hozinking.appinspector.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/filepaths" />
+        </provider>
 
         <!-- LSPosed / Xposed module declaration -->
         <meta-data
