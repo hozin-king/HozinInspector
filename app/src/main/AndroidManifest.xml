@@ -24,6 +24,9 @@
             </intent-filter>
         </activity>
         <activity
+            android:name=".ui.TracerActivity"
+            android:exported="false" />
+        <activity
             android:name=".ui.LogViewerActivity"
             android:exported="false" />
         <activity
