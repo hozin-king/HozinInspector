@@ -27,7 +27,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.FileProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -76,7 +75,7 @@ import java.util.Set;
  * Fetch + parse Readability4J jalan di background thread; UI di-update
  * via Handler(Looper.getMainLooper()).
  */
-public class ReaderActivity extends AppCompatActivity {
+public class ReaderActivity extends BaseActivity {
 
     public static final String EXTRA_URL = "url";
     public static final String EXTRA_SAVED_ID = "saved_id";

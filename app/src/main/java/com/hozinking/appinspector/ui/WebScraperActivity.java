@@ -22,7 +22,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.FileProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -66,7 +65,7 @@ import javax.net.ssl.SSLException;
  * - Tap item: buka di browser / salin URL / scrape URL ini.
  * - Salin semua + Export JSON (share via FileProvider, tanpa permission).
  */
-public class WebScraperActivity extends AppCompatActivity {
+public class WebScraperActivity extends BaseActivity {
 
     private static final String UA =
             "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 "

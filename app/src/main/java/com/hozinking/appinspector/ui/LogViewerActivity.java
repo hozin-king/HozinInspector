@@ -11,7 +11,6 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -30,7 +29,7 @@ import java.util.List;
  * Log viewer per kategori: badge TAG berwarna + chip filter.
  * Baca logcat SELALU di background thread; UI pakai ring buffer maks 1000 baris.
  */
-public class LogViewerActivity extends AppCompatActivity {
+public class LogViewerActivity extends BaseActivity {
 
     private static final int MAX_UI_LINES = 1000;
 

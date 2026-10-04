@@ -9,7 +9,6 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AppCompatActivity;
 
 import com.hozinking.appinspector.R;
 
@@ -17,7 +16,7 @@ import com.hozinking.appinspector.R;
  * Entry point fitur ROOT TOOLS — inspeksi mendalam app target memakai akses root.
  * Semua fitur read-only terhadap /data/data app target.
  */
-public class RootToolsActivity extends AppCompatActivity {
+public class RootToolsActivity extends BaseActivity {
 
     public static final String EXTRA_PKG = "pkg";
 

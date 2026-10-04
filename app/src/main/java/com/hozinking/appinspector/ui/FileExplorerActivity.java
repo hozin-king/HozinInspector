@@ -13,7 +13,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -28,7 +27,7 @@ import java.util.List;
  * Daftar direktori/file + ukuran + permission; tap file teks kecil (&lt;200KB)
  * untuk lihat isi; tap file lain untuk info. Navigasi naik/turun direktori.
  */
-public class FileExplorerActivity extends AppCompatActivity {
+public class FileExplorerActivity extends BaseActivity {
 
     private static final long TEXT_MAX = 200 * 1024;
 

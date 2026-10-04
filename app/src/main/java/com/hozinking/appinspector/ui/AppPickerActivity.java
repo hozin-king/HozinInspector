@@ -20,7 +20,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -35,7 +34,7 @@ import java.util.List;
  * toggle user/system app. Loading di background thread.
  * Hasil: extra "pkg" (package name) via setResult.
  */
-public class AppPickerActivity extends AppCompatActivity {
+public class AppPickerActivity extends BaseActivity {
 
     public static final String RESULT_PKG = "pkg";
 

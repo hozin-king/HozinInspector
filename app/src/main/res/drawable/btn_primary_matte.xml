@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Hozin Tools — MATTE: tombol primer flat + ripple, tanpa gloss. -->
+<ripple xmlns:android="http://schemas.android.com/apk/res/android"
+    android:color="#4006271F">
+    <item android:id="@android:id/mask">
+        <shape android:shape="rectangle">
+            <corners android:radius="28dp" />
+            <solid android:color="#FFFFFF" />
+        </shape>
+    </item>
+    <item>
+        <shape android:shape="rectangle">
+            <corners android:radius="28dp" />
+            <solid android:color="#00C98F" />
+        </shape>
+    </item>
+</ripple>

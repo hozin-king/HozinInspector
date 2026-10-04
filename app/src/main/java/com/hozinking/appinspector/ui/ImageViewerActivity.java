@@ -16,7 +16,6 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AppCompatActivity;
 
 import com.hozinking.appinspector.R;
 
@@ -42,7 +41,7 @@ import java.net.URL;
  * Tanpa library eksternal: Matrix + ScaleGestureDetector + GestureDetector.
  * Decode di-downsample (maks 2048px) agar tidak OOM.
  */
-public class ImageViewerActivity extends AppCompatActivity {
+public class ImageViewerActivity extends BaseActivity {
 
     public static final String EXTRA_IMG_URL = "img_url";
     public static final String EXTRA_IMG_PATH = "img_path";

@@ -12,7 +12,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -27,7 +26,7 @@ import java.util.List;
  * Copy read-only db target ke cache sendiri via su, lalu baca pakai SQLite API.
  * Tidak pernah menulis ke /data/data app target.
  */
-public class DbViewerActivity extends AppCompatActivity {
+public class DbViewerActivity extends BaseActivity {
 
     private static final int ROW_LIMIT = 100;
 

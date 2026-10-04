@@ -16,6 +16,7 @@
 
         <activity
             android:name=".ui.MainActivity"
+            android:theme="@style/Theme.HozinTools.Splash"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -66,6 +67,10 @@
             android:exported="false" />
         <activity
             android:name=".ui.UsernameSearchActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.SettingsActivity"
             android:exported="false" />
 
         <!-- FileProvider untuk share hasil export JSON -->

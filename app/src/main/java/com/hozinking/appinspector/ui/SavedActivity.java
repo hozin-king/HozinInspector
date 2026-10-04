@@ -16,7 +16,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -36,7 +35,7 @@ import java.util.Locale;
  * - Long-press → dialog: Hapus / Buka URL asli di browser.
  * - HAPUS SEMUA → dialog konfirmasi.
  */
-public class SavedActivity extends AppCompatActivity {
+public class SavedActivity extends BaseActivity {
 
     private RecyclerView rv;
     private TextView tvEmpty;

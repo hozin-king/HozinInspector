@@ -7,7 +7,6 @@ import android.os.Looper;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -20,7 +19,7 @@ import java.util.List;
  * Daftar method dari satu class ATAU satu grup class (dari dex):
  * signature + dex method index + label kecil class asalnya (mode grup).
  */
-public class MethodListActivity extends AppCompatActivity {
+public class MethodListActivity extends BaseActivity {
 
     public static final String EXTRA_PKG = "pkg";
     public static final String EXTRA_CLASS = "cls"; // single (lama)

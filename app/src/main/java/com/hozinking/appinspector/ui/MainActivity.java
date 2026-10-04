@@ -8,14 +8,16 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.transition.TransitionManager;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AppCompatActivity;
+import com.google.android.material.switchmaterial.SwitchMaterial;
 
 import com.hozinking.appinspector.R;
 
@@ -36,7 +38,7 @@ import java.util.List;
  *   dan di-restore saat dibuka (tidak ke-reset pas app di-close).
  * - SEMUA operasi berat (query app, tulis config via su, grant) di background thread.
  */
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends BaseActivity {
 
     private static final String PREFS = "hozininspector";
     private static final int REQ_PICK_CLASS = 1001;
@@ -46,7 +48,7 @@ public class MainActivity extends AppCompatActivity {
     private TextView tvTarget, tvPrefixes, tvStatus, tvHookClasses, tvHookWarn,
             tvGrantStatus, tvModuleStatus, tvClassSummary;
     private EditText etPrefix;
-    private CheckBox cbMethod, cbUrl, cbUi, cbPref, cbDump, cbRate, cbLogArgs;
+    private SwitchMaterial cbMethod, cbUrl, cbUi, cbPref, cbDump, cbRate, cbLogArgs;
     private Button btnSave;
     private String targetPackage = "";
     private final List<String> prefixes = new ArrayList<>();
@@ -81,11 +83,13 @@ public class MainActivity extends AppCompatActivity {
         renderHookClasses();
         if (!targetPackage.isEmpty()) updateClassSummary();
 
-        // setiap perubahan checkbox langsung disimpan (anti-reset)
-        CheckBox[] boxes = {cbMethod, cbUrl, cbUi, cbPref, cbDump, cbRate, cbLogArgs};
-        for (CheckBox cb : boxes) {
+        // setiap perubahan switch langsung disimpan (anti-reset)
+        SwitchMaterial[] boxes = {cbMethod, cbUrl, cbUi, cbPref, cbDump, cbRate, cbLogArgs};
+        for (SwitchMaterial cb : boxes) {
             cb.setOnCheckedChangeListener((b, checked) -> persistUiState());
         }
+
+        setupTracerCard();
 
         findViewById(R.id.btnPick).setOnClickListener(v ->
                 startActivityForResult(new Intent(this, AppPickerActivity.class), REQ_PICK_APP));
@@ -103,6 +107,10 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.btnPickClass).setOnClickListener(v -> pickClass());
         btnSave.setOnClickListener(v -> saveConfig());
         findViewById(R.id.btnGrant).setOnClickListener(v -> grantLogs());
+        findViewById(R.id.btnSettings).setOnClickListener(v ->
+                startActivity(new Intent(this, SettingsActivity.class)));
+        findViewById(R.id.cardSettings).setOnClickListener(v ->
+                startActivity(new Intent(this, SettingsActivity.class)));
         findViewById(R.id.cardLog).setOnClickListener(v ->
                 startActivity(new Intent(this, LogViewerActivity.class)));
         findViewById(R.id.cardManifest).setOnClickListener(v -> {
@@ -209,7 +217,8 @@ public class MainActivity extends AppCompatActivity {
         boolean granted = checkSelfPermission(Manifest.permission.READ_LOGS)
                 == PackageManager.PERMISSION_GRANTED;
         tvGrantStatus.setText(granted ? "READ_LOGS: GRANTED" : "READ_LOGS: BELUM");
-        tvGrantStatus.setBackgroundColor(granted ? 0xFF4CAF50 : 0xFFF44336);
+        tvGrantStatus.setBackgroundResource(
+                granted ? ThemeHelper.pillOk(this) : ThemeHelper.pillBad(this));
     }
 
     private void updateModuleStatus() {
@@ -225,7 +234,31 @@ public class MainActivity extends AppCompatActivity {
         } catch (Exception ignored) {
         }
         tvModuleStatus.setText(active ? "MODUL: AKTIF" : "MODUL: BELUM AKTIF");
-        tvModuleStatus.setBackgroundColor(active ? 0xFF4CAF50 : 0xFF616161);
+        tvModuleStatus.setBackgroundResource(
+                active ? ThemeHelper.pillOk(this) : ThemeHelper.pillNeutral(this));
+    }
+
+    // ---------- kartu expandable "Pengaturan Tracer" ----------
+
+    private void setupTracerCard() {
+        View card = findViewById(R.id.cardTracer);
+        View header = findViewById(R.id.tracerHeader);
+        View body = findViewById(R.id.tracerBody);
+        ImageView chevron = findViewById(R.id.ivTracerChevron);
+
+        boolean expanded = getSharedPreferences(PREFS, MODE_PRIVATE)
+                .getBoolean("tracer_expanded", false);
+        body.setVisibility(expanded ? View.VISIBLE : View.GONE);
+        chevron.setRotation(expanded ? 180f : 0f);
+
+        header.setOnClickListener(v -> {
+            boolean now = body.getVisibility() != View.VISIBLE;
+            TransitionManager.beginDelayedTransition((ViewGroup) card);
+            body.setVisibility(now ? View.VISIBLE : View.GONE);
+            chevron.animate().rotation(now ? 180f : 0f).setDuration(200).start();
+            getSharedPreferences(PREFS, MODE_PRIVATE).edit()
+                    .putBoolean("tracer_expanded", now).apply();
+        });
     }
 
     // ---------- pilih app via AppPickerActivity ----------

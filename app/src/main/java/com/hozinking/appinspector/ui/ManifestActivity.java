@@ -7,12 +7,11 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.widget.TextView;
 
-import androidx.appcompat.app.AppCompatActivity;
 
 import com.hozinking.appinspector.R;
 
 /** Menampilkan info manifest app target via PackageManager. */
-public class ManifestActivity extends AppCompatActivity {
+public class ManifestActivity extends BaseActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

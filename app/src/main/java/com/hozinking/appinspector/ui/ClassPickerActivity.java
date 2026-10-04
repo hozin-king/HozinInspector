@@ -12,7 +12,6 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -29,7 +28,7 @@ import java.util.Set;
  * Tap header = expand/collapse, tahan nama = lihat semua method grup,
  * centang header = hook semua member.
  */
-public class ClassPickerActivity extends AppCompatActivity {
+public class ClassPickerActivity extends BaseActivity {
 
     public static final String EXTRA_PKG = "pkg";
     public static final String EXTRA_SELECTED = "selected";

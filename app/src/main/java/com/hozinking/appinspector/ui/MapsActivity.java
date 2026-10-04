@@ -14,7 +14,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -31,7 +30,7 @@ import java.util.Map;
  * Ini menjawab kebutuhan "address" di level native (base address tiap .so).
  * Read-only.
  */
-public class MapsActivity extends AppCompatActivity {
+public class MapsActivity extends BaseActivity {
 
     private String pkg = "";
     private TextView tvTitle, tvInfo;

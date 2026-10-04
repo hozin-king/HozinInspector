@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Hozin Tools — atribut tema kaca. Setiap tema (Glossy/Matte) memetakan
+     atribut ini ke drawable-nya masing-masing, sehingga ganti tema cukup
+     ganti theme activity tanpa menyentuh layout. -->
+<resources>
+    <attr name="hiCardBg" format="reference" />
+    <attr name="hiBtnPrimaryBg" format="reference" />
+    <attr name="hiBtnGlassBg" format="reference" />
+    <attr name="hiPillBg" format="reference" />
+    <attr name="hiSearchBg" format="reference" />
+    <attr name="hiPillOk" format="reference" />
+    <attr name="hiPillBad" format="reference" />
+    <attr name="hiPillNeutral" format="reference" />
+</resources>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Hozin Tools — glow lembut teal di belakang tombol MULAI. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <corners android:radius="32dp" />
+    <gradient
+        android:angle="270"
+        android:startColor="#6600E5A0"
+        android:centerColor="#3300E5A0"
+        android:endColor="#0000E5A0"
+        android:type="linear" />
+</shape>

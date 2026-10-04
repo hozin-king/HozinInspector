@@ -10,7 +10,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -28,7 +27,7 @@ import java.util.List;
  * /data/data/&lt;pkg&gt;/shared_prefs/*.xml -> daftar key-value (string/boolean/int/long/float/set).
  * Read-only.
  */
-public class PrefViewerActivity extends AppCompatActivity {
+public class PrefViewerActivity extends BaseActivity {
 
     private String pkg = "";
     private TextView tvTitle, tvCrumb;

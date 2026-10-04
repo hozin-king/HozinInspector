@@ -9,7 +9,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="12dp">
+        android:padding="16dp">
 
         <!-- Header + status -->
         <LinearLayout
@@ -29,8 +29,8 @@
                     android:orientation="horizontal">
 
                     <ImageView
-                        android:layout_width="56dp"
-                        android:layout_height="56dp"
+                        android:layout_width="52dp"
+                        android:layout_height="52dp"
                         android:layout_marginEnd="12dp"
                         android:src="@mipmap/ic_launcher"
                         android:contentDescription="Hozin Tools" />
@@ -54,12 +54,20 @@
                             android:layout_marginTop="2dp"
                             android:text="App inspector universal (modul LSPosed)" />
                     </LinearLayout>
+
+                    <ImageButton
+                        android:id="@+id/btnSettings"
+                        android:layout_width="44dp"
+                        android:layout_height="44dp"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:src="@drawable/ic_tool_settings"
+                        android:contentDescription="Pengaturan" />
                 </LinearLayout>
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
+                    android:layout_marginTop="10dp"
                     android:orientation="horizontal">
 
                     <TextView
@@ -114,6 +122,7 @@
                         android:layout_weight="1"
                         android:fontFamily="monospace"
                         android:text="(belum dipilih)"
+                        android:textColor="#FFFFFF"
                         android:textSize="13sp" />
 
                     <Button
@@ -126,68 +135,115 @@
             </LinearLayout>
         </LinearLayout>
 
-        <!-- Fitur tracer -->
+        <!-- Pengaturan tracer: SATU kartu expandable -->
         <LinearLayout
+            android:id="@+id/cardTracer"
             style="@style/HiCard"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp">
 
             <LinearLayout
+                android:id="@+id/tracerHeader"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical">
+                android:background="?attr/selectableItemBackground"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:padding="4dp">
 
-                <TextView
-                    style="@style/HiSectionTitle"
-                    android:layout_width="wrap_content"
+                <LinearLayout
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:text="Fitur tracer" />
+                    android:layout_weight="1"
+                    android:orientation="vertical">
 
-                <CheckBox
+                    <TextView
+                        style="@style/HiSectionTitle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Pengaturan Tracer" />
+
+                    <TextView
+                        style="@style/HiSectionDesc"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:text="7 opsi tracer — tap untuk buka/tutup" />
+                </LinearLayout>
+
+                <ImageView
+                    android:id="@+id/ivTracerChevron"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_chevron_down"
+                    app:tint="#B3FFFFFF"
+                    android:contentDescription="Buka/tutup" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/tracerBody"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <com.google.android.material.switchmaterial.SwitchMaterial
                     android:id="@+id/cbMethod"
-                    android:layout_width="wrap_content"
+                    style="@style/HiSwitch"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
                     android:text="Method tracer" />
 
-                <CheckBox
+                <com.google.android.material.switchmaterial.SwitchMaterial
                     android:id="@+id/cbUrl"
-                    android:layout_width="wrap_content"
+                    style="@style/HiSwitch"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="URL tracker" />
 
-                <CheckBox
+                <com.google.android.material.switchmaterial.SwitchMaterial
                     android:id="@+id/cbUi"
-                    android:layout_width="wrap_content"
+                    style="@style/HiSwitch"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="UI interaction tracer" />
 
-                <CheckBox
+                <com.google.android.material.switchmaterial.SwitchMaterial
                     android:id="@+id/cbPref"
-                    android:layout_width="wrap_content"
+                    style="@style/HiSwitch"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="Pref access tracer" />
 
-                <CheckBox
+                <com.google.android.material.switchmaterial.SwitchMaterial
                     android:id="@+id/cbDump"
-                    android:layout_width="wrap_content"
+                    style="@style/HiSwitch"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="Dump layout (on-demand)" />
 
-                <CheckBox
+                <com.google.android.material.switchmaterial.SwitchMaterial
                     android:id="@+id/cbRate"
-                    android:layout_width="wrap_content"
+                    style="@style/HiSwitch"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
                     android:checked="true"
                     android:text="Batasi log 50/detik (anti-lag)" />
 
-                <CheckBox
-                    android:id="@+id/cbLogArgs"
+                <TextView
+                    style="@style/HiSectionDesc"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
+                    android:text="Rate limit mencegah target freeze saat method ramai dipanggil." />
+
+                <com.google.android.material.switchmaterial.SwitchMaterial
+                    android:id="@+id/cbLogArgs"
+                    style="@style/HiSwitch"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
                     android:checked="true"
                     android:text="Log argumen &amp; return value" />
 
@@ -195,15 +251,8 @@
                     style="@style/HiSectionDesc"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="2dp"
+                    android:layout_marginBottom="4dp"
                     android:text="Argumen/return bikin log lebih ramai — matikan bila lag." />
-
-                <TextView
-                    style="@style/HiSectionDesc"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="2dp"
-                    android:text="Rate limit mencegah target freeze saat method ramai dipanggil." />
             </LinearLayout>
         </LinearLayout>
 
@@ -246,6 +295,8 @@
                         android:hint="cth: com.contoh.app."
                         android:inputType="text"
                         android:fontFamily="monospace"
+                        android:textColor="#FFFFFF"
+                        android:textColorHint="#80FFFFFF"
                         android:textSize="13sp" />
 
                     <Button
@@ -263,6 +314,7 @@
                     android:layout_marginTop="4dp"
                     android:fontFamily="monospace"
                     android:text="(kosong)"
+                    android:textColor="#CCFFFFFF"
                     android:textSize="12sp" />
 
                 <LinearLayout
@@ -322,6 +374,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
                     android:text="0 class dipilih"
+                    android:textColor="#FFFFFF"
                     android:textSize="13sp" />
 
                 <TextView
@@ -353,21 +406,32 @@
             </LinearLayout>
         </LinearLayout>
 
-        <!-- Aksi -->
-        <Button
-            style="@style/HiButtonPrimary"
-            android:id="@+id/btnSave"
+        <!-- Tombol besar MULAI TRACING dengan glow -->
+        <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:text="SIMPAN CONFIG" />
+            android:layout_marginTop="20dp">
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_margin="-6dp"
+                android:background="@drawable/btn_start_glow" />
+
+            <Button
+                android:id="@+id/btnSave"
+                style="@style/HiButtonPrimary"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="MULAI TRACING" />
+        </FrameLayout>
 
         <Button
             android:id="@+id/btnGrant"
             style="@style/HiButtonGlass"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="10dp"
             android:text="GRANT READ_LOGS (root)" />
 
         <!-- Tools: grid kartu aksi kaca 2 kolom -->
@@ -375,7 +439,7 @@
             style="@style/HiSectionTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="20dp"
             android:text="Tools" />
 
         <LinearLayout
@@ -649,6 +713,60 @@
             </LinearLayout>
         </LinearLayout>
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:id="@+id/cardSettings"
+                style="@style/HiCard"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:layout_marginEnd="10dp"
+                    android:src="@drawable/ic_tool_settings"
+                    android:tint="@color/hi_accent" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Pengaturan"
+                        android:textColor="#FFFFFF"
+                        android:textSize="13sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Tema kaca &amp; info app"
+                        android:textColor="#B3FFFFFF"
+                        android:textSize="11sp" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_weight="1" />
+        </LinearLayout>
+
         <TextView
             android:id="@+id/tvStatus"
             android:layout_width="match_parent"
@@ -657,6 +775,7 @@
             android:layout_marginBottom="16dp"
             android:fontFamily="monospace"
             android:text=""
+            android:textColor="#CCFFFFFF"
             android:textSize="12sp" />
     </LinearLayout>
 </ScrollView>
