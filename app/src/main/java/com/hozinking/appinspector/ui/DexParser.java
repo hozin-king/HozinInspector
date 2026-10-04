@@ -158,7 +158,7 @@ public class DexParser {
             if (paramsOff != 0 && inRange(dex, paramsOff, 4)) {
                 int count = u32(dex, paramsOff);
                 for (int i = 0; i < count && i < 64; i++) {
-                    if (!inRange(dex, paramsOff + 4 + (i + 1) * 4)) break;
+                    if (!inRange(dex, paramsOff + 4 + i * 4, 4)) break;
                     int ti = u32(dex, paramsOff + 4 + i * 4);
                     if (i > 0) sb.append(", ");
                     sb.append(readableType(typeDesc(dex, strings, typeIdsOff, typeIdsSize, ti)));
