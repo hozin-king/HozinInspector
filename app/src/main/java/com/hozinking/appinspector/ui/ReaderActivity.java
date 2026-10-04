@@ -17,7 +17,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.hozinking.appinspector.R;
 
 import net.dankito.readability4j.Readability4J;
-import net.dankito.readability4j.model.Article;
+import net.dankito.readability4j.Article;
 
 import org.jsoup.HttpStatusException;
 import org.jsoup.Jsoup;
