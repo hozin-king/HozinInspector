@@ -12,7 +12,7 @@
         android:padding="12dp">
 
         <!-- Header + status -->
-        <com.google.android.material.card.MaterialCardView
+        <LinearLayout
             style="@style/HiCard"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
@@ -22,20 +22,39 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
 
-                <TextView
-                    android:layout_width="wrap_content"
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="HozinInspector"
-                    android:textSize="22sp"
-                    android:textStyle="bold"
-                    android:textColor="@color/hi_accent" />
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
 
-                <TextView
-                    style="@style/HiSectionDesc"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="2dp"
-                    android:text="App inspector universal (modul LSPosed)" />
+                    <ImageView
+                        android:layout_width="56dp"
+                        android:layout_height="56dp"
+                        android:layout_marginEnd="12dp"
+                        android:src="@mipmap/ic_launcher"
+                        android:contentDescription="Hozin Tools" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            style="@style/HiAppTitle"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Hozin Tools" />
+
+                        <TextView
+                            style="@style/HiSectionDesc"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:text="App inspector universal (modul LSPosed)" />
+                    </LinearLayout>
+                </LinearLayout>
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -49,7 +68,6 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginEnd="8dp"
-                        android:background="@color/hi_badge_other"
                         android:text="READ_LOGS: ..."
                         android:textColor="#FFFFFF" />
 
@@ -58,15 +76,14 @@
                         style="@style/HiStatusPill"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:background="@color/hi_badge_other"
                         android:text="MODUL: ..."
                         android:textColor="#FFFFFF" />
                 </LinearLayout>
             </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
+        </LinearLayout>
 
         <!-- App target -->
-        <com.google.android.material.card.MaterialCardView
+        <LinearLayout
             style="@style/HiCard"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -101,16 +118,16 @@
 
                     <Button
                         android:id="@+id/btnPick"
-                        style="@style/Widget.Material3.Button.OutlinedButton"
+                        style="@style/HiButtonGlass"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Pilih" />
                 </LinearLayout>
             </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
+        </LinearLayout>
 
         <!-- Fitur tracer -->
-        <com.google.android.material.card.MaterialCardView
+        <LinearLayout
             style="@style/HiCard"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -173,10 +190,10 @@
                     android:layout_marginTop="2dp"
                     android:text="Rate limit mencegah target freeze saat method ramai dipanggil." />
             </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
+        </LinearLayout>
 
         <!-- Filter prefix -->
-        <com.google.android.material.card.MaterialCardView
+        <LinearLayout
             style="@style/HiCard"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -218,7 +235,7 @@
 
                     <Button
                         android:id="@+id/btnAdd"
-                        style="@style/Widget.Material3.Button.OutlinedButton"
+                        style="@style/HiButtonGlass"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Tambah" />
@@ -241,7 +258,7 @@
 
                     <Button
                         android:id="@+id/btnDelLast"
-                        style="@style/Widget.Material3.Button.OutlinedButton"
+                        style="@style/HiButtonGlass"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
@@ -249,7 +266,7 @@
 
                     <Button
                         android:id="@+id/btnDelAll"
-                        style="@style/Widget.Material3.Button.OutlinedButton"
+                        style="@style/HiButtonGlass"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="8dp"
@@ -257,10 +274,10 @@
                         android:text="Hapus semua" />
                 </LinearLayout>
             </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
+        </LinearLayout>
 
         <!-- Hook class exact -->
-        <com.google.android.material.card.MaterialCardView
+        <LinearLayout
             style="@style/HiCard"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -304,7 +321,7 @@
 
                 <Button
                     android:id="@+id/btnPickClass"
-                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    style="@style/HiButtonGlass"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
@@ -319,10 +336,11 @@
                     android:fontFamily="monospace"
                     android:text="" />
             </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
+        </LinearLayout>
 
         <!-- Aksi -->
         <Button
+            style="@style/HiButtonPrimary"
             android:id="@+id/btnSave"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -331,7 +349,7 @@
 
         <Button
             android:id="@+id/btnGrant"
-            style="@style/Widget.Material3.Button.OutlinedButton"
+            style="@style/HiButtonGlass"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
@@ -345,7 +363,7 @@
 
             <Button
                 android:id="@+id/btnLog"
-                style="@style/Widget.Material3.Button.OutlinedButton"
+                style="@style/HiButtonGlass"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -353,7 +371,7 @@
 
             <Button
                 android:id="@+id/btnManifest"
-                style="@style/Widget.Material3.Button.OutlinedButton"
+                style="@style/HiButtonGlass"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
@@ -363,7 +381,7 @@
 
         <Button
             android:id="@+id/btnRootTools"
-            style="@style/Widget.Material3.Button.OutlinedButton"
+            style="@style/HiButtonGlass"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"

@@ -9,7 +9,7 @@
         android:orientation="vertical"
         android:padding="12dp">
 
-        <com.google.android.material.card.MaterialCardView
+        <LinearLayout
             style="@style/HiCard"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
@@ -20,7 +20,7 @@
                 android:orientation="vertical">
 
                 <TextView
-                    style="@style/HiSectionTitle"
+                    style="@style/HiAppTitle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="ROOT TOOLS" />
@@ -47,13 +47,12 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:background="@color/hi_badge_other"
                     android:text="ROOT: ..."
                     android:textColor="#FFFFFF" />
             </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
+        </LinearLayout>
 
-        <com.google.android.material.card.MaterialCardView
+        <LinearLayout
             style="@style/HiCard"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -79,15 +78,15 @@
 
                 <Button
                     android:id="@+id/btnPrefViewer"
-                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    style="@style/HiButtonGlass"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
                     android:text="BUKA PREF VIEWER" />
             </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
+        </LinearLayout>
 
-        <com.google.android.material.card.MaterialCardView
+        <LinearLayout
             style="@style/HiCard"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -113,15 +112,15 @@
 
                 <Button
                     android:id="@+id/btnDbViewer"
-                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    style="@style/HiButtonGlass"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
                     android:text="BUKA DATABASE VIEWER" />
             </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
+        </LinearLayout>
 
-        <com.google.android.material.card.MaterialCardView
+        <LinearLayout
             style="@style/HiCard"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -147,15 +146,15 @@
 
                 <Button
                     android:id="@+id/btnFileExplorer"
-                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    style="@style/HiButtonGlass"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
                     android:text="BUKA FILE EXPLORER" />
             </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
+        </LinearLayout>
 
-        <com.google.android.material.card.MaterialCardView
+        <LinearLayout
             style="@style/HiCard"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -182,12 +181,12 @@
 
                 <Button
                     android:id="@+id/btnMaps"
-                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    style="@style/HiButtonGlass"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
                     android:text="BUKA MEMORY MAPS" />
             </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
+        </LinearLayout>
     </LinearLayout>
 </ScrollView>

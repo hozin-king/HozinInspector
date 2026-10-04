@@ -31,7 +31,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Layar utama HozinInspector (dark hacker UI).
+ * Layar utama Hozin Tools (glassmorphism UI).
  * - State UI (target, checkbox, filter, class) disimpan di SharedPreferences tiap berubah
  *   dan di-restore saat dibuka (tidak ke-reset pas app di-close).
  * - SEMUA operasi berat (query app, tulis config via su, grant) di background thread.
