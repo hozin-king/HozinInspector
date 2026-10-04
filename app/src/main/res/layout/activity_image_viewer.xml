@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Hozin Tools — Mode view gambar full-screen (ImageViewerActivity) -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#000000">
+
+    <ImageView
+        android:id="@+id/ivZoom"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="matrix"
+        android:contentDescription="Gambar" />
+
+    <ProgressBar
+        android:id="@+id/progressImage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center" />
+
+    <TextView
+        android:id="@+id/tvImageError"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:padding="24dp"
+        android:text="Gagal memuat gambar.\nKetuk untuk keluar."
+        android:textColor="#FF8A80"
+        android:textSize="14sp"
+        android:visibility="gone" />
+
+    <!-- Tombol X: keluar -->
+    <TextView
+        android:id="@+id/btnCloseViewer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|end"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        android:background="@drawable/pill_glass"
+        android:clickable="true"
+        android:focusable="true"
+        android:gravity="center"
+        android:minWidth="44dp"
+        android:minHeight="44dp"
+        android:padding="10dp"
+        android:text="✕"
+        android:textColor="#FFFFFF"
+        android:textSize="18sp"
+        android:textStyle="bold" />
+
+    <!-- Petunjuk gestur, hilang saat disentuh -->
+    <TextView
+        android:id="@+id/tvImageHint"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|center_horizontal"
+        android:layout_marginBottom="32dp"
+        android:background="#80000000"
+        android:paddingLeft="14dp"
+        android:paddingRight="14dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
+        android:text="Cubit untuk zoom • ketuk 2x perbesar • ketuk 1x keluar"
+        android:textColor="#B0FFFFFF"
+        android:textSize="12sp" />
+
+</FrameLayout>

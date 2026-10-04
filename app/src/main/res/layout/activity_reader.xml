@@ -104,7 +104,34 @@
                 android:layout_height="180dp"
                 android:layout_marginTop="10dp"
                 android:scaleType="centerCrop"
+                android:contentDescription="Gambar artikel (ketuk untuk perbesar)"
                 android:visibility="gone" />
+
+            <!-- Strip gambar dalam artikel (ketuk -> mode view) -->
+            <TextView
+                android:id="@+id/tvImagesLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:text="Gambar dalam artikel (ketuk untuk perbesar)"
+                android:textColor="#B0FFFFFF"
+                android:textSize="12sp"
+                android:visibility="gone" />
+
+            <HorizontalScrollView
+                android:id="@+id/svArticleImages"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:scrollbars="none"
+                android:visibility="gone">
+
+                <LinearLayout
+                    android:id="@+id/llArticleImages"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal" />
+            </HorizontalScrollView>
 
             <TextView
                 android:id="@+id/tvReaderBody"

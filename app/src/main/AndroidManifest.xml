@@ -59,6 +59,9 @@
             android:name=".ui.ReaderActivity"
             android:exported="false" />
         <activity
+            android:name=".ui.ImageViewerActivity"
+            android:exported="false" />
+        <activity
             android:name=".ui.SavedActivity"
             android:exported="false" />
         <activity

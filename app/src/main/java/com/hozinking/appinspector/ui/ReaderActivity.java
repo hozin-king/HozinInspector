@@ -21,6 +21,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -125,9 +126,16 @@ public class ReaderActivity extends AppCompatActivity {
     private Button btnSave, btnExport;
     private View cardRelated;
     private RecyclerView rvRelated;
+    private View svImages;
+    private LinearLayout llArticleImages;
+    private TextView tvImagesLabel;
 
     // Artikel yang sedang tampil — dipakai tombol SIMPAN OFFLINE & EKSPOR.
     private String artTitle, artUrl, artByline, artExcerpt, artText, artHeroUrl;
+    /** Path thumbnail lokal (mode offline) — untuk image viewer. */
+    private String artHeroPath;
+    /** URL gambar di dalam isi artikel (mode live) — untuk strip + viewer. */
+    private List<String> artImages = new ArrayList<>();
     private long artDate;
     private String relatedJson;
 
@@ -151,10 +159,15 @@ public class ReaderActivity extends AppCompatActivity {
         cardRelated = findViewById(R.id.cardRelated);
         rvRelated = findViewById(R.id.rvRelated);
         rvRelated.setLayoutManager(new LinearLayoutManager(this));
+        svImages = findViewById(R.id.svArticleImages);
+        llArticleImages = findViewById(R.id.llArticleImages);
+        tvImagesLabel = findViewById(R.id.tvImagesLabel);
 
         btnSave.setOnClickListener(v -> saveOffline());
         btnExport.setOnClickListener(v -> showExportDialog());
         tvUrl.setOnClickListener(v -> openBrowser(artUrl));
+        // Tap gambar hero -> mode view full-screen (zoom)
+        ivHero.setOnClickListener(v -> openHeroViewer());
 
         relatedJson = getIntent().getStringExtra(EXTRA_RELATED_JSON);
 
@@ -238,6 +251,7 @@ public class ReaderActivity extends AppCompatActivity {
     /** Parse HTML: Readability4J dulu, fallback ke teks body yang dibersihkan. */
     private void parseHtml(String url, String html) {
         String title = null, byline = null, excerpt = null, text = null;
+        String contentHtml = null;
 
         try {
             Article a = new Readability4J(url, html).parse();
@@ -247,6 +261,7 @@ public class ReaderActivity extends AppCompatActivity {
                 byline = nz(a.getByline());
                 excerpt = nz(a.getExcerpt());
                 text = a.getTextContent().trim();
+                contentHtml = a.getContent();
             }
         } catch (Throwable ignored) {
             // jatuh ke fallback di bawah
@@ -279,7 +294,10 @@ public class ReaderActivity extends AppCompatActivity {
         artExcerpt = excerpt;
         artText = text;
         artHeroUrl = hero;
+        artHeroPath = null;
         artDate = System.currentTimeMillis();
+        // Gambar di dalam isi artikel (dari HTML readability).
+        artImages = extractImages(contentHtml, url, hero);
     }
 
     // ---------------------------------------------------------------- offline
@@ -312,6 +330,8 @@ public class ReaderActivity extends AppCompatActivity {
                 artExcerpt = item.excerpt;
                 artText = item.content;
                 artHeroUrl = null;
+                artHeroPath = item.thumbPath;
+                artImages = new ArrayList<>();
                 artDate = item.savedAt;
                 showArticle(true, item.savedAt);
                 // thumbnail lokal bila ada
@@ -368,6 +388,9 @@ public class ReaderActivity extends AppCompatActivity {
         cardReader.setVisibility(View.VISIBLE);
         btnExport.setVisibility(View.VISIBLE);
 
+        // Strip gambar dalam artikel (bisa di-tap -> viewer)
+        buildImageStrip(offline);
+
         // Artikel terkait (dari halaman yang sama)
         showRelated();
 
@@ -394,6 +417,95 @@ public class ReaderActivity extends AppCompatActivity {
                 }).start();
             }
         }
+    }
+
+    // ------------------------------------------- image viewer (zoom)
+
+    /** Tap gambar hero -> buka mode view full-screen. */
+    private void openHeroViewer() {
+        if (artHeroPath != null && !artHeroPath.isEmpty()) {
+            openImageViewer(null, artHeroPath);
+        } else if (artHeroUrl != null && !artHeroUrl.isEmpty()) {
+            openImageViewer(artHeroUrl, null);
+        }
+    }
+
+    private void openImageViewer(String url, String path) {
+        Intent i = new Intent(this, ImageViewerActivity.class);
+        if (url != null) i.putExtra(ImageViewerActivity.EXTRA_IMG_URL, url);
+        if (path != null) i.putExtra(ImageViewerActivity.EXTRA_IMG_PATH, path);
+        startActivity(i);
+    }
+
+    /**
+     * Strip "Gambar dalam artikel": thumbnail horizontal di bawah hero,
+     * masing-masing bisa di-tap -> viewer full-screen. Hanya mode live
+     * (offline tidak menyimpan gambar inline).
+     */
+    private void buildImageStrip(boolean offline) {
+        llArticleImages.removeAllViews();
+        if (offline || artImages == null || artImages.isEmpty()) {
+            tvImagesLabel.setVisibility(View.GONE);
+            svImages.setVisibility(View.GONE);
+            return;
+        }
+        tvImagesLabel.setVisibility(View.VISIBLE);
+        svImages.setVisibility(View.VISIBLE);
+
+        float d = getResources().getDisplayMetrics().density;
+        int sizePx = (int) (96 * d);
+        int mPx = (int) (8 * d);
+        for (String src : artImages) {
+            ImageView iv = new ImageView(this);
+            LinearLayout.LayoutParams lp =
+                    new LinearLayout.LayoutParams(sizePx, sizePx);
+            lp.setMargins(0, 0, mPx, 0);
+            iv.setLayoutParams(lp);
+            iv.setScaleType(ImageView.ScaleType.CENTER_CROP);
+            iv.setBackgroundColor(0xFF1A2B3C);
+            iv.setTag(src);
+            iv.setOnClickListener(v -> openImageViewer(src, null));
+            llArticleImages.addView(iv);
+            new Thread(() -> {
+                final Bitmap bmp = fetchBitmap(src);
+                handler.post(() -> {
+                    if (!isFinishing() && src.equals(iv.getTag())
+                            && bmp != null) {
+                        iv.setImageBitmap(bmp);
+                    }
+                });
+            }).start();
+        }
+    }
+
+    /**
+     * Ambil URL gambar dari HTML konten readability (maks 20).
+     * Skip data URI, pixel tracking, dan duplikat hero image.
+     */
+    private static List<String> extractImages(String contentHtml,
+                                              String baseUrl, String heroUrl) {
+        List<String> out = new ArrayList<>();
+        if (contentHtml == null || contentHtml.isEmpty()) return out;
+        try {
+            Document cdoc = Jsoup.parse(contentHtml, baseUrl);
+            Set<String> seen = new HashSet<>();
+            for (Element img : cdoc.select("img[src]")) {
+                String src = img.attr("abs:src").trim();
+                if (src.isEmpty() || src.startsWith("data:")) continue;
+                String low = src.toLowerCase(Locale.US);
+                if (low.contains("pixel") || low.contains("1x1")
+                        || low.contains("spacer") || low.contains("blank.")
+                        || low.contains("tracking")
+                        || low.contains("transparent")) {
+                    continue;
+                }
+                if (heroUrl != null && src.equals(heroUrl)) continue;
+                if (seen.add(src)) out.add(src);
+                if (out.size() >= 20) break;
+            }
+        } catch (Exception ignored) {
+        }
+        return out;
     }
 
     // ------------------------------------------------- artikel terkait
