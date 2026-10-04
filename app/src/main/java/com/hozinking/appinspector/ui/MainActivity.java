@@ -103,16 +103,20 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.btnPickClass).setOnClickListener(v -> pickClass());
         btnSave.setOnClickListener(v -> saveConfig());
         findViewById(R.id.btnGrant).setOnClickListener(v -> grantLogs());
-        findViewById(R.id.btnLog).setOnClickListener(v ->
+        findViewById(R.id.cardLog).setOnClickListener(v ->
                 startActivity(new Intent(this, LogViewerActivity.class)));
-        findViewById(R.id.btnManifest).setOnClickListener(v -> {
+        findViewById(R.id.cardManifest).setOnClickListener(v -> {
             Intent i = new Intent(this, ManifestActivity.class);
             i.putExtra("pkg", targetPackage);
             startActivity(i);
         });
-        findViewById(R.id.btnWebScraper).setOnClickListener(v ->
+        findViewById(R.id.cardWebScraper).setOnClickListener(v ->
                 startActivity(new Intent(this, WebScraperActivity.class)));
-        findViewById(R.id.btnRootTools).setOnClickListener(v -> {
+        findViewById(R.id.cardOsint).setOnClickListener(v ->
+                startActivity(new Intent(this, UsernameSearchActivity.class)));
+        findViewById(R.id.cardSaved).setOnClickListener(v ->
+                startActivity(new Intent(this, SavedActivity.class)));
+        findViewById(R.id.cardRootTools).setOnClickListener(v -> {
             if (targetPackage.isEmpty()) {
                 toast("Pilih app target dulu");
                 return;
@@ -128,6 +132,23 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
         updateGrantStatus();
         updateModuleStatus();
+        updateSavedCount();
+    }
+
+    /** Tampilkan jumlah artikel offline di kartu Tersimpan. */
+    private void updateSavedCount() {
+        TextView tv = findViewById(R.id.tvSavedCount);
+        if (tv == null) return;
+        new Thread(() -> {
+            int n = 0;
+            try {
+                n = SavedArticleDb.getInstance(this).count();
+            } catch (Exception ignored) {
+            }
+            final int count = n;
+            runOnUiThread(() ->
+                    tv.setText(count + " artikel offline"));
+        }).start();
     }
 
     // ---------- state persistence (BUG 3) ----------

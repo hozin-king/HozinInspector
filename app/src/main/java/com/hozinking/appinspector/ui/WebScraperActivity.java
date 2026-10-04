@@ -75,7 +75,8 @@ public class WebScraperActivity extends AppCompatActivity {
 
     private EditText etUrl, etSearch;
     private Button btnScrape, btnCopyAll, btnExport;
-    private TextView tvStatus, tvPageTitle, tvPageDesc, tvPageUrl, tvArticleCount;
+    private TextView tvStatus, tvPageTitle, tvPageDesc, tvPageUrl, tvArticleCount,
+            tvSavedCountWs;
     private ImageView ivPageThumb;
     private RecyclerView rv;
     private View cardPageInfo, cardArticles;
@@ -86,14 +87,39 @@ public class WebScraperActivity extends AppCompatActivity {
 
     private static class Article {
         String title, url, thumb;
+        int score;
     }
 
     private static class PageInfo {
         String title, desc, thumb, finalUrl;
     }
 
+    /** Pola URL yang jelas BUKAN artikel (navigasi/tag/iklan/dll). */
+    private static final String[] URL_BLACKLIST = {
+            "/tag/", "/tags/", "/kategori/", "/category/", "/categories/",
+            "/kanal/", "/channel/", "/topik/", "/topic/", "/penulis/",
+            "/author/", "/redaksi/", "/iklan", "/ads/", "/advertorial/",
+            "/search", "/cari/", "/page/", "/halaman/", "/arsip/",
+    };
+
+    /** Timestamp / waktu relatif (Indonesia + Inggris) di sekitar kartu. */
+    private static final java.util.regex.Pattern TIMESTAMP_RE =
+            java.util.regex.Pattern.compile(
+                    "(\\d{1,2}[\\s/.:-]\\d{1,2}[\\s/.:-]\\d{2,4})"
+                            + "|(\\d+\\s*(menit|jam|hari|minggu|bulan|tahun)\\s*(yang\\s*)?lalu)"
+                            + "|(baru\\s*saja|kemarin|today|yesterday|\\d+\\s*(minutes?|hours?|days?)\\s*ago)",
+                    java.util.regex.Pattern.CASE_INSENSITIVE);
+
+    /** Judul generik yang biasanya bukan artikel. */
+    private static final String[] GENERIC_TITLES = {
+            "baca juga", "selengkapnya", "read more", "lanjutkan membaca",
+            "lihat semua", "selengkapnya di sini", "klik di sini",
+    };
+
     private final List<Article> all = new ArrayList<>();
     private PageInfo lastPage;
+    // statistik scrape terakhir (transparansi)
+    private int skipBlacklist, skipDup, skipEmpty;
 
     // cache thumbnail (8 MB), shared antar bind
     private static final LruCache<String, Bitmap> IMG_CACHE =
@@ -123,6 +149,10 @@ public class WebScraperActivity extends AppCompatActivity {
         rv = findViewById(R.id.rvArticles);
         cardPageInfo = findViewById(R.id.cardPageInfo);
         cardArticles = findViewById(R.id.cardArticles);
+        tvSavedCountWs = findViewById(R.id.tvSavedCountWs);
+
+        findViewById(R.id.btnOpenSaved).setOnClickListener(v ->
+                startActivity(new Intent(this, SavedActivity.class)));
 
         rv.setLayoutManager(new LinearLayoutManager(this));
 
@@ -140,6 +170,24 @@ public class WebScraperActivity extends AppCompatActivity {
                 handler.postDelayed(pendingFilter, 300);
             }
         });
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        refreshSavedCount();
+    }
+
+    private void refreshSavedCount() {
+        new Thread(() -> {
+            int n = 0;
+            try {
+                n = SavedArticleDb.getInstance(this).count();
+            } catch (Exception ignored) {
+            }
+            final int count = n;
+            handler.post(() -> tvSavedCountWs.setText(count + " artikel"));
+        }).start();
     }
 
     // ---------- scrape ----------
@@ -171,7 +219,16 @@ public class WebScraperActivity extends AppCompatActivity {
                     all.clear();
                     all.addAll(arts);
                     applyFilter();
-                    tvStatus.setText("Selesai — " + arts.size() + " artikel ditemukan.");
+                    String skipped = "";
+                    int totalSkip = skipBlacklist + skipDup + skipEmpty;
+                    if (totalSkip > 0) {
+                        skipped = " (" + totalSkip + " di-skip: "
+                                + skipBlacklist + " navigasi/tag, "
+                                + skipDup + " duplikat, "
+                                + skipEmpty + " kosong)";
+                    }
+                    tvStatus.setText("Selesai — " + arts.size()
+                            + " artikel ditemukan" + skipped + ".");
                 });
             } catch (Exception e) {
                 handler.post(() -> {
@@ -214,36 +271,142 @@ public class WebScraperActivity extends AppCompatActivity {
     }
 
     /**
-     * Ekstrak kartu artikel: semua &lt;a href&gt; yang berisi &lt;img&gt;.
-     * Judul: alt gambar → atribut title → teks link. Dedup by URL, maks 200.
+     * Ekstrak kartu artikel dengan SKORING per &lt;a href&gt; yang berisi &lt;img&gt;.
+     * Skor: (a) panjang teks anchor, (b) timestamp/penulis di sekitarnya,
+     * (c) blacklist pola URL navigasi/tag/iklan, (d) dedup URL ternormalisasi.
+     * Hasil diurutkan by skor (tertinggi dulu), maks 200.
      */
     private List<Article> extractArticles(Document doc) {
+        skipBlacklist = 0;
+        skipDup = 0;
+        skipEmpty = 0;
         Map<String, Article> byUrl = new LinkedHashMap<>();
+        List<Article> scored = new ArrayList<>();
         Elements links = doc.select("a[href]:has(img)");
         for (Element a : links) {
-            if (byUrl.size() >= MAX_ARTICLES) break;
             String href = a.attr("abs:href").trim();
             if (href.isEmpty() || href.startsWith("#")
                     || href.startsWith("javascript:")
                     || href.startsWith("mailto:")
                     || href.startsWith("tel:")) {
+                skipEmpty++;
                 continue;
             }
-            if (byUrl.containsKey(href)) continue;
+            String low = href.toLowerCase(Locale.US);
+            boolean bad = false;
+            for (String pat : URL_BLACKLIST) {
+                if (low.contains(pat)) {
+                    bad = true;
+                    break;
+                }
+            }
+            if (bad) {
+                skipBlacklist++;
+                continue;
+            }
+            String norm = normalizeUrl(href);
+            if (byUrl.containsKey(norm)) {
+                skipDup++;
+                continue;
+            }
+
             Element img = a.selectFirst("img");
             String thumb = img != null ? img.attr("abs:src").trim() : "";
             String title = img != null ? img.attr("alt").trim() : "";
             if (title.isEmpty()) title = a.attr("title").trim();
-            if (title.isEmpty()) title = a.text().trim().replaceAll("\\s+", " ");
+            String text = a.text().trim().replaceAll("\\s+", " ");
+            if (title.isEmpty()) title = text;
             if (title.length() > 140) title = title.substring(0, 140) + "...";
-            if (title.isEmpty()) title = "(tanpa judul)";
+            if (title.isEmpty()) {
+                skipEmpty++;
+                continue;
+            }
+
+            // ---- skoring ----
+            int score = 0;
+            // (a) panjang teks anchor: kartu artikel biasanya punya teks deskriptif
+            score += Math.min(text.length(), 120);
+            if (!text.isEmpty() && !title.equals(text)) score += 10;
+            // (b) timestamp / penulis di konteks sekitar (parent)
+            Element ctx = a.parent() != null ? a.parent() : a;
+            String ctxText = ctx.text();
+            if (ctxText.length() > a.text().length() + 20) {
+                if (TIMESTAMP_RE.matcher(ctxText).find()) score += 40;
+                if (ctx.select("[class*=author],[class*=penulis],[class*=writer],"
+                        + "[class*=byline],[class*=tanggal],[class*=date],[class*=time]")
+                        .first() != null) {
+                    score += 25;
+                }
+            }
+            // gambar bermakna (bukan tracker 1px / icon)
+            if (!thumb.isEmpty()) {
+                String tl = thumb.toLowerCase(Locale.US);
+                if (tl.endsWith(".gif") || tl.contains("tracker")
+                        || tl.contains("pixel") || tl.contains("1x1")) {
+                    score -= 20;
+                } else {
+                    score += 15;
+                }
+            }
+            // penalti judul generik / terlalu pendek
+            String tlow = title.toLowerCase(Locale.US);
+            for (String g : GENERIC_TITLES) {
+                if (tlow.equals(g) || tlow.startsWith(g + " ")) {
+                    score -= 40;
+                    break;
+                }
+            }
+            if (title.length() < 12) score -= 30;
+            // bonus: URL terlihat seperti URL artikel (ada slug kata)
+            String path = low.replaceFirst("^https?://[^/]+", "");
+            if (path.split("-").length >= 3 && path.length() > 20) score += 10;
+
             Article art = new Article();
             art.title = title;
             art.url = href;
             art.thumb = thumb;
-            byUrl.put(href, art);
+            art.score = score;
+            byUrl.put(norm, art);
+            scored.add(art);
         }
-        return new ArrayList<>(byUrl.values());
+        // urut skor tertinggi dulu, potong 200
+        scored.sort((x, y) -> Integer.compare(y.score, x.score));
+        if (scored.size() > MAX_ARTICLES) {
+            scored = scored.subList(0, MAX_ARTICLES);
+        }
+        return scored;
+    }
+
+    /** Normalisasi URL untuk dedup: buang fragment + param tracking umum. */
+    private String normalizeUrl(String href) {
+        try {
+            URL u = new URL(href);
+            String query = u.getQuery();
+            String kept = "";
+            if (query != null) {
+                StringBuilder sb = new StringBuilder();
+                for (String kv : query.split("&")) {
+                    String k = kv.split("=", 2)[0].toLowerCase(Locale.US);
+                    if (k.startsWith("utm_") || k.equals("fbclid") || k.equals("gclid")
+                            || k.equals("_ga") || k.equals("ref") || k.equals("output")) {
+                        continue;
+                    }
+                    if (sb.length() > 0) sb.append('&');
+                    sb.append(kv);
+                }
+                kept = sb.toString();
+            }
+            String path = u.getPath();
+            if (path.endsWith("/") && path.length() > 1) {
+                path = path.substring(0, path.length() - 1);
+            }
+            return (u.getProtocol() + "://" + u.getHost()
+                    + (u.getPort() != -1 ? ":" + u.getPort() : "")
+                    + path + (kept.isEmpty() ? "" : "?" + kept))
+                    .toLowerCase(Locale.US);
+        } catch (Exception e) {
+            return href.toLowerCase(Locale.US);
+        }
     }
 
     private void renderPage(PageInfo p) {
@@ -294,7 +457,12 @@ public class WebScraperActivity extends AppCompatActivity {
             h.title.setText(a.title);
             h.url.setText(a.url);
             loadThumb(h.thumb, a.thumb);
-            h.itemView.setOnClickListener(v -> showArticleMenu(a));
+            // tap = buka di Reader; tahan = menu (browser/salin/scrape)
+            h.itemView.setOnClickListener(v -> openReader(a));
+            h.itemView.setOnLongClickListener(v -> {
+                showArticleMenu(a);
+                return true;
+            });
         }
 
         @Override
@@ -319,16 +487,18 @@ public class WebScraperActivity extends AppCompatActivity {
         new MaterialAlertDialogBuilder(this)
                 .setTitle(a.title)
                 .setItems(new CharSequence[]{
-                        "Buka di browser", "Salin URL", "Scrape URL ini"
+                        "Buka di Reader", "Buka di browser", "Salin URL", "Scrape URL ini"
                 }, (d, which) -> {
                     if (which == 0) {
+                        openReader(a);
+                    } else if (which == 1) {
                         try {
                             startActivity(new Intent(Intent.ACTION_VIEW,
                                     Uri.parse(a.url)));
                         } catch (Exception e) {
                             toast("Tidak bisa membuka: " + e.getMessage());
                         }
-                    } else if (which == 1) {
+                    } else if (which == 2) {
                         ClipboardManager cm = (ClipboardManager)
                                 getSystemService(CLIPBOARD_SERVICE);
                         cm.setPrimaryClip(ClipData.newPlainText("url", a.url));
@@ -339,6 +509,13 @@ public class WebScraperActivity extends AppCompatActivity {
                     }
                 })
                 .show();
+    }
+
+    /** Buka artikel di ReaderActivity (ekstrak isi bersih via readability4j). */
+    private void openReader(Article a) {
+        Intent i = new Intent(this, ReaderActivity.class);
+        i.putExtra(ReaderActivity.EXTRA_URL, a.url);
+        startActivity(i);
     }
 
     // ---------- thumbnail loader (background, LruCache) ----------

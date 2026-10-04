@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Hozin Tools — Layar baca artikel (ReaderActivity) -->
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="12dp">
+
+        <!-- Header -->
+        <LinearLayout
+            style="@style/HiCard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                style="@style/HiAppTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Baca Artikel" />
+
+            <TextView
+                style="@style/HiSectionDesc"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:text="Versi bersih tanpa iklan. Bisa disimpan untuk dibaca offline." />
+        </LinearLayout>
+
+        <!-- Loading -->
+        <ProgressBar
+            android:id="@+id/progressReader"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="32dp" />
+
+        <!-- Error -->
+        <TextView
+            android:id="@+id/tvReaderError"
+            style="@style/HiSectionDesc"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:gravity="center"
+            android:textColor="#FF8A80"
+            android:visibility="gone" />
+
+        <!-- Kartu artikel -->
+        <LinearLayout
+            android:id="@+id/cardReader"
+            style="@style/HiCard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:visibility="gone">
+
+            <TextView
+                android:id="@+id/tvReaderTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="#FFFFFF"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tvReaderByline"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:textColor="#B0FFFFFF"
+                android:textSize="12sp" />
+
+            <TextView
+                android:id="@+id/tvReaderExcerpt"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:textColor="#E0FFFFFF"
+                android:textSize="14sp"
+                android:textStyle="italic"
+                android:visibility="gone" />
+
+            <ImageView
+                android:id="@+id/ivReaderHero"
+                android:layout_width="match_parent"
+                android:layout_height="180dp"
+                android:layout_marginTop="10dp"
+                android:scaleType="centerCrop"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/tvReaderBody"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:lineSpacingMultiplier="1.35"
+                android:textColor="#F2F2F2"
+                android:textSize="16sp" />
+        </LinearLayout>
+
+        <!-- Tombol simpan (disembunyikan di mode offline) -->
+        <Button
+            android:id="@+id/btnSaveOffline"
+            style="@style/HiButtonPrimary"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="SIMPAN OFFLINE"
+            android:visibility="gone" />
+
+        <!-- Info mode offline -->
+        <TextView
+            android:id="@+id/tvOfflineInfo"
+            style="@style/HiStatusPill"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:gravity="center"
+            android:visibility="gone" />
+    </LinearLayout>
+</ScrollView>

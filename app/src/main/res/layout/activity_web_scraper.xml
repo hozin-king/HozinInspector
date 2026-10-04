@@ -176,5 +176,56 @@
                 android:layout_marginTop="8dp"
                 android:nestedScrollingEnabled="true" />
         </LinearLayout>
+
+        <!-- Artikel tersimpan (offline) -->
+        <LinearLayout
+            android:id="@+id/cardSaved"
+            style="@style/HiCard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="16dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:layout_marginEnd="10dp"
+                    android:src="@drawable/ic_tool_bookmark"
+                    android:tint="@color/hi_accent" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        style="@style/HiSectionTitle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Tersimpan offline" />
+
+                    <TextView
+                        android:id="@+id/tvSavedCountWs"
+                        style="@style/HiSectionDesc"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0 artikel" />
+                </LinearLayout>
+
+                <Button
+                    android:id="@+id/btnOpenSaved"
+                    style="@style/HiButtonGlass"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Buka" />
+            </LinearLayout>
+        </LinearLayout>
     </LinearLayout>
 </ScrollView>

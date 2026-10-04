@@ -55,6 +55,15 @@
         <activity
             android:name=".ui.WebScraperActivity"
             android:exported="false" />
+        <activity
+            android:name=".ui.ReaderActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.SavedActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.UsernameSearchActivity"
+            android:exported="false" />
 
         <!-- FileProvider untuk share hasil export JSON -->
         <provider
