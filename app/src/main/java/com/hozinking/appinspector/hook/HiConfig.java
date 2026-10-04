@@ -22,6 +22,8 @@ public class HiConfig {
     public List<String> hookClasses = new ArrayList<>();
     /** Batasi log method tracer maks 50/detik per tag (anti-lag). */
     public boolean rateLimit = true;
+    /** Log argumen + return value di method tracer (default ON; bisa bikin log ramai). */
+    public boolean logArgs = true;
     public boolean urlTrack = false;
     public boolean uiTrace = false;
     public boolean prefTrace = false;
@@ -61,6 +63,7 @@ public class HiConfig {
                     }
                 }
                 cfg.rateLimit = o.optBoolean("rateLimit", true);
+                cfg.logArgs = o.optBoolean("logArgs", true);
                 break; // pakai file pertama yang ketemu
             } catch (Exception ignored) {
             }

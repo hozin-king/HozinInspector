@@ -24,9 +24,10 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Daftar SEMUA class dari APK target (parse dex) + checkbox pilih yang di-hook.
- * Tap nama class (bukan checkbox) -> lihat daftar method-nya.
- * Class bisa puluhan ribu: filter teks + RecyclerView, tampilan dibatasi 5000 baris.
+ * Daftar SEMUA class dari APK target (parse dex), dikelompokkan per outer class:
+ * inner class ($1, $2, ...) gabung di bawah outer-nya.
+ * Tap header = expand/collapse, tahan nama = lihat semua method grup,
+ * centang header = hook semua member.
  */
 public class ClassPickerActivity extends AppCompatActivity {
 
@@ -40,6 +41,8 @@ public class ClassPickerActivity extends AppCompatActivity {
     private TextView tvCount;
     private ClassAdapter adapter;
     private final List<String> all = new ArrayList<>();
+    private final List<ClassAdapter.Group> groups = new ArrayList<>();
+    private final Set<String> expanded = new HashSet<>();
     private final Set<String> selected = new HashSet<>();
     private String pkg = "";
     private final Handler handler = new Handler(Looper.getMainLooper());
@@ -59,20 +62,38 @@ public class ClassPickerActivity extends AppCompatActivity {
         etSearch = findViewById(R.id.etSearch);
         tvCount = findViewById(R.id.tvClassCount);
         rv.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new ClassAdapter(new ArrayList<>(), selected, new ClassAdapter.Listener() {
+        adapter = new ClassAdapter(selected, new ClassAdapter.Listener() {
             @Override
             public void onToggle(String cls, boolean checked) {
                 if (checked) selected.add(cls);
                 else selected.remove(cls);
+                adapter.notifyDataSetChanged(); // refresh state checkbox header grup
                 updateTitle();
             }
 
             @Override
-            public void onInfo(String cls) {
+            public void onToggleGroup(ClassAdapter.Group g, boolean checked) {
+                if (checked) selected.addAll(g.members);
+                else selected.removeAll(g.members);
+                // refresh tampilan checkbox header
+                adapter.notifyDataSetChanged();
+                updateTitle();
+            }
+
+            @Override
+            public void onInfo(List<String> classes) {
                 Intent i = new Intent(ClassPickerActivity.this, MethodListActivity.class);
                 i.putExtra(MethodListActivity.EXTRA_PKG, pkg);
-                i.putExtra(MethodListActivity.EXTRA_CLASS, cls);
+                i.putStringArrayListExtra(MethodListActivity.EXTRA_CLASSES,
+                        new ArrayList<>(classes));
                 startActivity(i);
+            }
+
+            @Override
+            public void onExpand(ClassAdapter.Group g) {
+                if (expanded.contains(g.outer)) expanded.remove(g.outer);
+                else expanded.add(g.outer);
+                applyFilter(currentQuery);
             }
         });
         rv.setAdapter(adapter);
@@ -102,7 +123,7 @@ public class ClassPickerActivity extends AppCompatActivity {
 
     private void updateTitle() {
         tvCount.setText(selected.size() + " class dipilih"
-                + (all.isEmpty() ? "" : " • total " + all.size() + " class"));
+                + (groups.isEmpty() ? "" : " • " + groups.size() + " grup"));
     }
 
     private void loadClasses() {
@@ -111,9 +132,12 @@ public class ClassPickerActivity extends AppCompatActivity {
             try {
                 ApplicationInfo ai = getPackageManager().getApplicationInfo(pkg, 0);
                 final List<String> list = DexParser.listClasses(ai.sourceDir);
+                final List<ClassAdapter.Group> gs = ClassAdapter.buildGroups(list);
                 handler.post(() -> {
                     all.clear();
                     all.addAll(list);
+                    groups.clear();
+                    groups.addAll(gs);
                     applyFilter(currentQuery);
                     updateTitle();
                     if (list.isEmpty()) {
@@ -134,18 +158,42 @@ public class ClassPickerActivity extends AppCompatActivity {
     private void applyFilter(final String q) {
         new Thread(() -> {
             final String query = q.trim().toLowerCase();
-            final List<String> f = new ArrayList<>();
-            for (String c : all) {
-                if (query.isEmpty() || c.toLowerCase().contains(query)) {
-                    f.add(c);
-                    if (f.size() >= MAX_ROWS) break;
+            final List<ClassAdapter.Row> rows = new ArrayList<>();
+            for (ClassAdapter.Group g : groups) {
+                boolean outerHit = query.isEmpty() || g.outer.toLowerCase().contains(query);
+                List<String> hitMembers = new ArrayList<>();
+                for (String m : g.members) {
+                    if (query.isEmpty() || m.toLowerCase().contains(query)) hitMembers.add(m);
                 }
+                if (!outerHit && hitMembers.isEmpty()) continue;
+                boolean showMembers;
+                List<String> shown;
+                if (query.isEmpty()) {
+                    showMembers = expanded.contains(g.outer);
+                    shown = g.members;
+                } else if (outerHit) {
+                    showMembers = true;
+                    shown = g.members;
+                } else {
+                    showMembers = true;
+                    shown = hitMembers;
+                }
+                rows.add(new ClassAdapter.Row(true, showMembers, g, g.outer));
+                if (showMembers) {
+                    for (String m : shown) {
+                        if (m.equals(g.outer)) continue; // outer sudah jadi header
+                        rows.add(new ClassAdapter.Row(false, false, g, m));
+                        if (rows.size() >= MAX_ROWS) break;
+                    }
+                }
+                if (rows.size() >= MAX_ROWS) break;
             }
-            final boolean capped = f.size() >= MAX_ROWS && all.size() > MAX_ROWS;
+            final boolean capped = rows.size() >= MAX_ROWS;
+            final int shownRows = rows.size();
             handler.post(() -> {
-                adapter.setData(f);
+                adapter.setRows(rows);
                 tvCount.setText(selected.size() + " class dipilih • menampilkan "
-                        + f.size() + " dari " + all.size() + " class"
+                        + shownRows + " baris dari " + groups.size() + " grup"
                         + (capped ? " (dibatasi)" : "")
                         + (query.isEmpty() ? "" : " • filter: \"" + q.trim() + "\""));
             });

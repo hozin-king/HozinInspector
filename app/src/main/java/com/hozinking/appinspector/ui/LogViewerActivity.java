@@ -5,6 +5,9 @@ import android.content.ClipboardManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -40,6 +43,8 @@ public class LogViewerActivity extends AppCompatActivity {
     /** Semua baris (sudah di-parse), dibatasi ring buffer. */
     private final Deque<LogAdapter.Line> all = new ArrayDeque<>();
     private LogAdapter.Cat filter = LogAdapter.Cat.ALL;
+    private String searchQuery = "";
+    private Runnable pendingSearch;
     private final List<Chip> chips = new ArrayList<>();
 
     private static final LogAdapter.Cat[] CATS = {
@@ -82,6 +87,20 @@ public class LogViewerActivity extends AppCompatActivity {
         findViewById(R.id.btnRefresh).setOnClickListener(v -> refresh());
         findViewById(R.id.btnClear).setOnClickListener(v -> clearLog());
         findViewById(R.id.btnCopy).setOnClickListener(v -> copyLog());
+
+        EditText etSearch = findViewById(R.id.etLogSearch);
+        etSearch.addTextChangedListener(new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int a, int b, int c) {}
+            @Override public void onTextChanged(CharSequence s, int a, int b, int c) {}
+            @Override public void afterTextChanged(Editable s) {
+                if (pendingSearch != null) handler.removeCallbacks(pendingSearch);
+                pendingSearch = () -> {
+                    searchQuery = etSearch.getText().toString();
+                    applyFilter();
+                };
+                handler.postDelayed(pendingSearch, 300);
+            }
+        });
         refresh();
     }
 
@@ -103,13 +122,20 @@ public class LogViewerActivity extends AppCompatActivity {
 
     private void applyFilter() {
         List<LogAdapter.Line> f = new ArrayList<>();
+        String q = searchQuery.trim().toLowerCase();
         for (LogAdapter.Line l : all) {
-            if (LogAdapter.matchCat(l, filter)) f.add(l);
+            if (!LogAdapter.matchCat(l, filter)) continue;
+            if (!q.isEmpty()) {
+                String hay = (l.badge + " " + l.msg).toLowerCase();
+                if (!hay.contains(q)) continue;
+            }
+            f.add(l);
         }
         adapter.setData(f);
         rv.scrollToPosition(Math.max(0, f.size() - 1));
         tvCount.setText("Menampilkan " + f.size() + " / " + all.size()
-                + " baris (maks " + MAX_UI_LINES + " di UI)");
+                + " baris (maks " + MAX_UI_LINES + " di UI)"
+                + (q.isEmpty() ? "" : " • cari: \"" + searchQuery.trim() + "\""));
     }
 
     private List<LogAdapter.Line> readLog() {

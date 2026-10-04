@@ -26,7 +26,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="2dp"
-        android:text="Tap nama class untuk lihat method-nya. Centang untuk di-hook."
+        android:text="Tap grup: buka/tutup inner class. Tahan nama grup: lihat semua method. Tap nama class: lihat method-nya. Centang: hook."
         android:textSize="12sp" />
 
     <androidx.recyclerview.widget.RecyclerView

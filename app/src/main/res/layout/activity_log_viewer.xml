@@ -37,6 +37,16 @@
             android:text="Copy" />
     </LinearLayout>
 
+    <EditText
+        style="@style/HiSearchField"
+        android:id="@+id/etLogSearch"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:hint="Cari di log... (cth: coin, balance)"
+        android:inputType="text"
+        android:imeOptions="actionSearch" />
+
     <HorizontalScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

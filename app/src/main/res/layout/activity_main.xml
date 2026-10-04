@@ -183,6 +183,21 @@
                     android:checked="true"
                     android:text="Batasi log 50/detik (anti-lag)" />
 
+                <CheckBox
+                    android:id="@+id/cbLogArgs"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:checked="true"
+                    android:text="Log argumen &amp; return value" />
+
+                <TextView
+                    style="@style/HiSectionDesc"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="Argumen/return bikin log lebih ramai — matikan bila lag." />
+
                 <TextView
                     style="@style/HiSectionDesc"
                     android:layout_width="wrap_content"

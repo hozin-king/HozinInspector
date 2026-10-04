@@ -46,7 +46,7 @@ public class MainActivity extends AppCompatActivity {
     private TextView tvTarget, tvPrefixes, tvStatus, tvHookClasses, tvHookWarn,
             tvGrantStatus, tvModuleStatus, tvClassSummary;
     private EditText etPrefix;
-    private CheckBox cbMethod, cbUrl, cbUi, cbPref, cbDump, cbRate;
+    private CheckBox cbMethod, cbUrl, cbUi, cbPref, cbDump, cbRate, cbLogArgs;
     private Button btnSave;
     private String targetPackage = "";
     private final List<String> prefixes = new ArrayList<>();
@@ -73,6 +73,7 @@ public class MainActivity extends AppCompatActivity {
         cbPref = findViewById(R.id.cbPref);
         cbDump = findViewById(R.id.cbDump);
         cbRate = findViewById(R.id.cbRate);
+        cbLogArgs = findViewById(R.id.cbLogArgs);
         btnSave = findViewById(R.id.btnSave);
 
         restoreUiState();
@@ -81,7 +82,7 @@ public class MainActivity extends AppCompatActivity {
         if (!targetPackage.isEmpty()) updateClassSummary();
 
         // setiap perubahan checkbox langsung disimpan (anti-reset)
-        CheckBox[] boxes = {cbMethod, cbUrl, cbUi, cbPref, cbDump, cbRate};
+        CheckBox[] boxes = {cbMethod, cbUrl, cbUi, cbPref, cbDump, cbRate, cbLogArgs};
         for (CheckBox cb : boxes) {
             cb.setOnCheckedChangeListener((b, checked) -> persistUiState());
         }
@@ -145,6 +146,7 @@ public class MainActivity extends AppCompatActivity {
                     .putBoolean("cb_pref", cbPref.isChecked())
                     .putBoolean("cb_dump", cbDump.isChecked())
                     .putBoolean("cb_rate", cbRate.isChecked())
+                    .putBoolean("cb_logargs", cbLogArgs.isChecked())
                     .putString("prefixes", pre.toString())
                     .putString("hookClasses", hooks.toString())
                     .apply();
@@ -163,6 +165,7 @@ public class MainActivity extends AppCompatActivity {
             cbPref.setChecked(sp.getBoolean("cb_pref", false));
             cbDump.setChecked(sp.getBoolean("cb_dump", false));
             cbRate.setChecked(sp.getBoolean("cb_rate", true));
+            cbLogArgs.setChecked(sp.getBoolean("cb_logargs", true));
             prefixes.clear();
             JSONArray pre = new JSONArray(sp.getString("prefixes", "[]"));
             for (int i = 0; i < pre.length(); i++) {
@@ -319,6 +322,7 @@ public class MainActivity extends AppCompatActivity {
         final boolean pref = cbPref.isChecked();
         final boolean dump = cbDump.isChecked();
         final boolean rate = cbRate.isChecked();
+        final boolean logArgs = cbLogArgs.isChecked();
         final List<String> preCopy = new ArrayList<>(prefixes);
         final List<String> hookCopy = new ArrayList<>(hookClasses);
         final String target = targetPackage;
@@ -336,6 +340,7 @@ public class MainActivity extends AppCompatActivity {
                 for (String h : hookCopy) hooks.put(h);
                 o.put("hookClasses", hooks);
                 o.put("rateLimit", rate);
+                o.put("logArgs", logArgs);
                 o.put("urlTrack", url);
                 o.put("uiTrace", ui);
                 o.put("prefTrace", pref);

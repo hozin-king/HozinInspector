@@ -24,6 +24,8 @@ public class DexParser {
         public final String name;
         public final String signature; // contoh: onCreate(Bundle): void
         public final int dexIndex;     // index di method_ids (bukan address!)
+        /** Class asal method ini (diisi pemanggil bila menampilkan banyak class). */
+        public String owner = "";
         public MethodInfo(String n, String s, int i) {
             name = n;
             signature = s;

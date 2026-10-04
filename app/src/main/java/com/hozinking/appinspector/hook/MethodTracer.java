@@ -28,6 +28,7 @@ public class MethodTracer {
         exact.addAll(cfg.hookClasses);
         final boolean rateLimit = cfg.rateLimit;
         TRACE_HOOK_LIMITED = rateLimit;
+        TRACE_LOG_ARGS = cfg.logArgs;
         XposedHelpers.findAndHookMethod(ClassLoader.class, "loadClass", String.class,
                 new XC_MethodHook() {
                     @Override
@@ -49,6 +50,24 @@ public class MethodTracer {
     }
 
     private static volatile boolean TRACE_HOOK_LIMITED = true;
+    /** Bila true, log CALL/RET menyertakan argumen + return value. */
+    private static volatile boolean TRACE_LOG_ARGS = true;
+
+    /** String aman untuk satu argumen: Tipe=nilai (array diringkas). */
+    private static String argStr(Object o) {
+        if (o == null) return "null";
+        try {
+            Class<?> c = o.getClass();
+            if (c.isArray()) {
+                Class<?> comp = c.getComponentType();
+                int len = java.lang.reflect.Array.getLength(o);
+                return (comp != null ? comp.getSimpleName() : "?") + "[](len=" + len + ")";
+            }
+            return c.getSimpleName() + "=" + HiLog.safe(o, 120);
+        } catch (Throwable t) {
+            return "<?>";
+        }
+    }
 
     private static boolean matches(String name, List<String> prefixes, Set<String> exact) {
         if (name.startsWith("com.hozinking.appinspector.")) return false;
@@ -91,13 +110,19 @@ public class MethodTracer {
                 StringBuilder sb = new StringBuilder();
                 sb.append("CALL ")
                         .append(HiLog.shortName(param.method.getDeclaringClass().getName()))
-                        .append(".").append(param.method.getName()).append("(");
-                Object[] args = param.args;
-                for (int i = 0; i < args.length; i++) {
-                    if (i > 0) sb.append(", ");
-                    sb.append(HiLog.safe(args[i], 200));
+                        .append(".").append(param.method.getName());
+                if (TRACE_LOG_ARGS) {
+                    sb.append("(");
+                    Object[] args = param.args;
+                    for (int i = 0; i < args.length; i++) {
+                        if (i > 0) sb.append(", ");
+                        sb.append(argStr(args[i]));
+                    }
+                    sb.append(")");
+                } else {
+                    sb.append("()");
                 }
-                sb.append(") [").append(Thread.currentThread().getName()).append("]");
+                sb.append(" [").append(Thread.currentThread().getName()).append("]");
                 HiLog.i("MT", sb.toString());
             } catch (Throwable ignored) {
             }
@@ -107,12 +132,23 @@ public class MethodTracer {
         protected void afterHookedMethod(MethodHookParam param) {
             try {
                 if (TRACE_HOOK_LIMITED && !RateLimiter.allow("MT")) return;
-                String ret = param.hasThrowable()
-                        ? "THROW " + HiLog.safe(param.getThrowable(), 200)
-                        : "-> " + HiLog.safe(param.getResult(), 200);
-                HiLog.i("MT", "RET "
+                String tag = "RET "
                         + HiLog.shortName(param.method.getDeclaringClass().getName())
-                        + "." + param.method.getName() + " " + ret);
+                        + "." + param.method.getName();
+                if (!TRACE_LOG_ARGS) {
+                    HiLog.i("MT", tag);
+                    return;
+                }
+                String ret;
+                if (param.hasThrowable()) {
+                    ret = "THROW " + HiLog.safe(param.getThrowable(), 120);
+                } else if (param.method instanceof Method
+                        && ((Method) param.method).getReturnType() == void.class) {
+                    ret = "-> <void>";
+                } else {
+                    ret = "-> " + HiLog.safe(param.getResult(), 120);
+                }
+                HiLog.i("MT", tag + " " + ret);
             } catch (Throwable ignored) {
             }
         }

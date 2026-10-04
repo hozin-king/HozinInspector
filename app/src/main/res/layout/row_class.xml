@@ -21,4 +21,16 @@
         android:fontFamily="monospace"
         android:textSize="13sp"
         android:padding="8dp" />
+
+    <TextView
+        android:id="@+id/tvBadge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:textSize="11sp"
+        android:textStyle="bold"
+        android:paddingStart="10dp"
+        android:paddingEnd="10dp"
+        android:paddingTop="4dp"
+        android:paddingBottom="4dp" />
 </LinearLayout>
