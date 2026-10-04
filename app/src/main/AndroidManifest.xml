@@ -76,6 +76,68 @@
             android:name=".ui.SettingsActivity"
             android:exported="false" />
 
+        <!-- Pentest Tools: menu + 19 tool recon/keamanan -->
+        <activity
+            android:name=".ui.PentestActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.WebTechActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.SecHeaderActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.PortScanActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.DnsToolActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.SubdomainActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.SslCheckActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.EncoderLabActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.RobotsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.CookieFlagActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.CorsCheckActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.XssTestActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.SqliTestActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.DirBustActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.JsSecretActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.WaybackActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.SubBruteActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.WafDetectActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.HashCrackActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.MethodCheckActivity"
+            android:exported="false" />
+
         <!-- FileProvider untuk share hasil export JSON -->
         <provider
             android:name="androidx.core.content.FileProvider"

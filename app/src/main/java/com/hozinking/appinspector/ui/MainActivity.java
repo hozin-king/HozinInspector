@@ -62,6 +62,8 @@ public class MainActivity extends BaseActivity {
                 startActivity(new Intent(this, SavedActivity.class)));
         findViewById(R.id.cardSettings).setOnClickListener(v ->
                 startActivity(new Intent(this, SettingsActivity.class)));
+        findViewById(R.id.cardPentest).setOnClickListener(v ->
+                startActivity(new Intent(this, PentestActivity.class)));
     }
 
     @Override
