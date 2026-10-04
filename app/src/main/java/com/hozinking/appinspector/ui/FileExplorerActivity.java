@@ -1,6 +1,7 @@
 package com.hozinking.appinspector.ui;
 
 import android.app.AlertDialog;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -166,7 +167,7 @@ public class FileExplorerActivity extends AppCompatActivity {
     private void showText(String name, String content) {
         TextView tv = new TextView(this);
         tv.setText(content.isEmpty() ? "(file kosong)" : content);
-        tv.setFontFamily("monospace");
+        tv.setTypeface(Typeface.MONOSPACE);
         tv.setTextSize(12);
         tv.setTextIsSelectable(true);
         tv.setPadding(24, 24, 24, 24);
